@@ -80,6 +80,13 @@ list(APPEND model_srcs
   model/nh_core.F90
   model/nh_utils.F90)
 
+list(APPEND stubs_srcs
+  stubs/gfdl_cloud_microphys.f90
+  stubs/gfs_typedefs.f90
+  stubs/ccpp_data.f90
+  stubs/ccpp_static_api.f90
+  stubs/gfdl_mp.f90)
+
 list(APPEND tools_srcs
   tools/coarse_grained_diagnostics.F90
   tools/coarse_grained_restart_files.F90
@@ -113,7 +120,8 @@ list(APPEND driver_srcs
   driver/fvGFS/atmosphere.F90)
 
 list(APPEND fv3_srcs ${model_srcs}
-                     ${tools_srcs})
+                     ${tools_srcs}
+                     ${stubs_srcs})
 
 list(APPEND fv3_defs SPMD
                      MOIST_CAPPA

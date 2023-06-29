@@ -479,7 +479,7 @@ contains
                     qcon(i,km1) = q0(i,km1,liq_wat) + q0(i,km1,ice_wat) +                  &
                                   q0(i,km1,snowwat) + q0(i,km1,rainwat) + q0(i,km1,graupel)
                  elseif ( nwat==7 ) then
-                    qcon(i,km1) = q0(i,km1,liq_wat) + q0(i,km1,ice_wat) +                  & 
+                    qcon(i,km1) = q0(i,km1,liq_wat) + q0(i,km1,ice_wat) +                  &
                                   q0(i,km1,snowwat) + q0(i,km1,rainwat) + q0(i,km1,graupel) + q0(i,km1,hailwat)
                  endif
 ! u:
@@ -991,6 +991,7 @@ contains
          do i=is,ie
             qcon(i,k) = q0(i,k,liq_wat)+q0(i,k,ice_wat)+q0(i,k,snowwat)+q0(i,k,rainwat)
          enddo
+      enddo
    elseif ( nwat==6 ) then
       do k=1,kbot
          do i=is,ie
