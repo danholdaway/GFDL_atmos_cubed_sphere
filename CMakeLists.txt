@@ -52,11 +52,11 @@ else()
   set(kind "R8")
 endif()
 
-if(NOT FMS_FOUND)
-  find_package(FMS REQUIRED COMPONENTS ${kind})
-  string(TOLOWER ${kind} kind_lower)
-  add_library(fms ALIAS FMS::fms_${kind_lower})
-endif()
+# if(NOT FMS_FOUND)
+#   find_package(FMS REQUIRED COMPONENTS ${kind})
+#   string(TOLOWER ${kind} kind_lower)
+#   add_library(fms ALIAS FMS::fms_${kind_lower})
+# endif()
 
 list(APPEND model_srcs
   model/a2b_edge.F90
@@ -85,7 +85,17 @@ list(APPEND stubs_srcs
   stubs/gfs_typedefs.f90
   stubs/ccpp_data.f90
   stubs/ccpp_static_api.f90
-  stubs/gfdl_mp.f90)
+  stubs/gfdl_mp.f90
+  stubs/fms/constants.F90
+  stubs/fms/fms_io.F90
+  stubs/fms/mpp_domains.F90
+  stubs/fms/mpp_io.F90
+  stubs/fms/time_manager.F90
+  stubs/fms/field_manager.F90
+  stubs/fms/horiz_interp_type.F90
+  stubs/fms/mpp.F90
+  stubs/fms/mpp_paramter.F90
+  stubs/fms/tracer_manager.F90)
 
 list(APPEND tools_srcs
   tools/coarse_grained_diagnostics.F90
@@ -196,7 +206,7 @@ target_include_directories(fv3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 
 target_compile_definitions(fv3 PRIVATE "${fv3_defs}")
 
-target_link_libraries(fv3 PUBLIC fms)
+# target_link_libraries(fv3 PUBLIC fms)
 
 if(GFS_PHYS)
   target_link_libraries(fv3 PUBLIC fv3ccpp)
