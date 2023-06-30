@@ -1,6 +1,6 @@
 module mpp_mod
 
-use fv_arrays_mod, only: FVPRC
+use platform_mod, only: r8_kind
 
 implicit none
 private
@@ -36,7 +36,7 @@ contains
 
  subroutine mpp_broadcast(field,fsize,n,pelist)
  
-  real(FVPRC), intent(inout) :: field(:,:,:)
+  real(r8_kind), intent(inout) :: field(:,:,:)
   integer, intent(in) :: fsize,n,pelist(:)
 
    field = 2*field
@@ -45,7 +45,7 @@ contains
 
  subroutine mpp_send(field,fieldsize,recv_proc)
 
-  real(FVPRC), intent(inout) :: field(:,:,:)
+  real(r8_kind), intent(inout) :: field(:,:,:)
   integer, intent(in) :: fieldsize, recv_proc
 
    field = 2*field
@@ -54,7 +54,7 @@ contains
 
  subroutine mpp_recv(field,fieldsize,send_proc)
 
-  real(FVPRC), intent(inout) :: field(:,:,:)
+  real(r8_kind), intent(inout) :: field(:,:,:)
   integer, intent(in) :: fieldsize, send_proc
 
    field = 2*field

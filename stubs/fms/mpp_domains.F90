@@ -1,4 +1,4 @@
-module mpp_domains_mod
+module mpp_domains_mod 
 
 implicit none
 private
@@ -321,14 +321,22 @@ public DGRID_NE, CGRID_NE, &
   end interface
 
   interface mpp_update_domains
-     module procedure mpp_update_domain2D_2d
-     module procedure mpp_update_domain2D_3d
-     module procedure mpp_update_domain2D_4d
-     module procedure mpp_update_domain2D_5d
-     module procedure mpp_update_domain2D_2dv
-     module procedure mpp_update_domain2D_3dv
-     module procedure mpp_update_domain2D_4dv
-     module procedure mpp_update_domain2D_5dv
+     module procedure mpp_update_domain2D_r4_2d
+     module procedure mpp_update_domain2D_r4_3d
+     module procedure mpp_update_domain2D_r4_4d
+     module procedure mpp_update_domain2D_r4_5d
+     module procedure mpp_update_domain2D_r4_2dv
+     module procedure mpp_update_domain2D_r4_3dv
+     module procedure mpp_update_domain2D_r4_4dv
+     module procedure mpp_update_domain2D_r4_5dv
+     module procedure mpp_update_domain2D_r8_2d
+     module procedure mpp_update_domain2D_r8_3d
+     module procedure mpp_update_domain2D_r8_4d
+     module procedure mpp_update_domain2D_r8_5d
+     module procedure mpp_update_domain2D_r8_2dv
+     module procedure mpp_update_domain2D_r8_3dv
+     module procedure mpp_update_domain2D_r8_4dv
+     module procedure mpp_update_domain2D_r8_5dv
   end interface
 
   interface mpp_global_sum
@@ -346,9 +354,9 @@ public DGRID_NE, CGRID_NE, &
 ! mpp_update_domains
 ! ------------------
 
- subroutine mpp_update_domain2D_2d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ subroutine mpp_update_domain2D_r4_2d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
 
-  real(FVPRC), intent(inout) :: field1(:,:)
+  real(kind=4), intent(inout) :: field1(:,:)
   type(domain2d), intent(in) :: domain
   integer, optional, intent(in) :: gridtype
   logical, optional, intent(in) :: complete
@@ -356,10 +364,10 @@ public DGRID_NE, CGRID_NE, &
 
   field1 = 2*field1
 
- endsubroutine mpp_update_domain2D_2d
- subroutine mpp_update_domain2D_3d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ endsubroutine mpp_update_domain2D_r4_2d
+ subroutine mpp_update_domain2D_r4_3d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
 
-  real(FVPRC), intent(inout) :: field1(:,:,:)
+  real(kind=4), intent(inout) :: field1(:,:,:)
   type(domain2d), intent(in) :: domain
   integer, optional, intent(in) :: gridtype
   logical, optional, intent(in) :: complete
@@ -367,10 +375,10 @@ public DGRID_NE, CGRID_NE, &
 
   field1 = 2*field1
 
- endsubroutine mpp_update_domain2D_3d
- subroutine mpp_update_domain2D_4d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ endsubroutine mpp_update_domain2D_r4_3d
+ subroutine mpp_update_domain2D_r4_4d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
 
-  real(FVPRC), intent(inout) :: field1(:,:,:,:)
+  real(kind=4), intent(inout) :: field1(:,:,:,:)
   type(domain2d), intent(in) :: domain
   integer, optional, intent(in) :: gridtype
   logical, optional, intent(in) :: complete
@@ -378,10 +386,10 @@ public DGRID_NE, CGRID_NE, &
 
   field1 = 2*field1
 
- endsubroutine mpp_update_domain2D_4d
- subroutine mpp_update_domain2D_5d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ endsubroutine mpp_update_domain2D_r4_4d
+ subroutine mpp_update_domain2D_r4_5d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
 
-  real(FVPRC), intent(inout) :: field1(:,:,:,:,:)
+  real(kind=4), intent(inout) :: field1(:,:,:,:,:)
   type(domain2d), intent(in) :: domain
   integer, optional, intent(in) :: gridtype
   logical, optional, intent(in) :: complete
@@ -389,23 +397,10 @@ public DGRID_NE, CGRID_NE, &
 
   field1 = 2*field1
 
- endsubroutine mpp_update_domain2D_5d
+ endsubroutine mpp_update_domain2D_r4_5d
+ subroutine mpp_update_domain2D_r4_2dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
 
- subroutine mpp_update_domain2D_2dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(FVPRC), intent(inout) :: field1(:,:), field2(:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-  field2 = 2*field2
-
- endsubroutine mpp_update_domain2D_2dv
- subroutine mpp_update_domain2D_3dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(FVPRC), intent(inout) :: field1(:,:,:), field2(:,:,:)
+  real(kind=4), intent(inout) :: field1(:,:), field2(:,:)
   type(domain2d), intent(in) :: domain
   integer, optional, intent(in) :: gridtype
   logical, optional, intent(in) :: complete
@@ -414,11 +409,10 @@ public DGRID_NE, CGRID_NE, &
   field1 = 2*field1
   field2 = 2*field2
 
+ endsubroutine mpp_update_domain2D_r4_2dv
+ subroutine mpp_update_domain2D_r4_3dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
 
- endsubroutine mpp_update_domain2D_3dv
- subroutine mpp_update_domain2D_4dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(FVPRC), intent(inout) :: field1(:,:,:,:), field2(:,:,:,:)
+  real(kind=4), intent(inout) :: field1(:,:,:), field2(:,:,:)
   type(domain2d), intent(in) :: domain
   integer, optional, intent(in) :: gridtype
   logical, optional, intent(in) :: complete
@@ -427,10 +421,11 @@ public DGRID_NE, CGRID_NE, &
   field1 = 2*field1
   field2 = 2*field2
 
- endsubroutine mpp_update_domain2D_4dv
- subroutine mpp_update_domain2D_5dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
 
-  real(FVPRC), intent(inout) :: field1(:,:,:,:,:), field2(:,:,:,:,:)
+ endsubroutine mpp_update_domain2D_r4_3dv
+ subroutine mpp_update_domain2D_r4_4dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+
+  real(kind=4), intent(inout) :: field1(:,:,:,:), field2(:,:,:,:)
   type(domain2d), intent(in) :: domain
   integer, optional, intent(in) :: gridtype
   logical, optional, intent(in) :: complete
@@ -439,7 +434,113 @@ public DGRID_NE, CGRID_NE, &
   field1 = 2*field1
   field2 = 2*field2
 
- endsubroutine mpp_update_domain2D_5dv
+ endsubroutine mpp_update_domain2D_r4_4dv
+ subroutine mpp_update_domain2D_r4_5dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+
+  real(kind=4), intent(inout) :: field1(:,:,:,:,:), field2(:,:,:,:,:)
+  type(domain2d), intent(in) :: domain
+  integer, optional, intent(in) :: gridtype
+  logical, optional, intent(in) :: complete
+  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+
+  field1 = 2*field1
+  field2 = 2*field2
+
+ endsubroutine mpp_update_domain2D_r4_5dv
+
+ subroutine mpp_update_domain2D_r8_2d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+
+   real(kind=8), intent(inout) :: field1(:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+ 
+ endsubroutine mpp_update_domain2D_r8_2d
+ subroutine mpp_update_domain2D_r8_3d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ 
+   real(kind=8), intent(inout) :: field1(:,:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+ 
+ endsubroutine mpp_update_domain2D_r8_3d
+ subroutine mpp_update_domain2D_r8_4d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ 
+   real(kind=8), intent(inout) :: field1(:,:,:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+ 
+ endsubroutine mpp_update_domain2D_r8_4d
+ subroutine mpp_update_domain2D_r8_5d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ 
+   real(kind=8), intent(inout) :: field1(:,:,:,:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+ 
+ endsubroutine mpp_update_domain2D_r8_5d
+ subroutine mpp_update_domain2D_r8_2dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ 
+   real(kind=8), intent(inout) :: field1(:,:), field2(:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+   field2 = 2*field2
+ 
+ endsubroutine mpp_update_domain2D_r8_2dv
+ subroutine mpp_update_domain2D_r8_3dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ 
+   real(kind=8), intent(inout) :: field1(:,:,:), field2(:,:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+   field2 = 2*field2
+ 
+ 
+ endsubroutine mpp_update_domain2D_r8_3dv
+ subroutine mpp_update_domain2D_r8_4dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ 
+   real(kind=8), intent(inout) :: field1(:,:,:,:), field2(:,:,:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+   field2 = 2*field2
+ 
+ endsubroutine mpp_update_domain2D_r8_4dv
+ subroutine mpp_update_domain2D_r8_5dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
+ 
+   real(kind=8), intent(inout) :: field1(:,:,:,:,:), field2(:,:,:,:,:)
+   type(domain2d), intent(in) :: domain
+   integer, optional, intent(in) :: gridtype
+   logical, optional, intent(in) :: complete
+   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
+ 
+   field1 = 2*field1
+   field2 = 2*field2
+ 
+ endsubroutine mpp_update_domain2D_r8_5dv
 
 
 

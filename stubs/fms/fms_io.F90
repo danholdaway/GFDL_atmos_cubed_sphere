@@ -3,6 +3,15 @@ module fms_io_mod
  use mpp_io_mod
 
 implicit none
+
+abstract interface
+subroutine func(z)
+   character(len=6), intent (in) :: z
+end subroutine func
+end interface
+
+procedure (func), pointer :: fmsset_filename_appendix => null ()
+
 private
 
 public restart_file_type

@@ -88,6 +88,7 @@ list(APPEND stubs_srcs
   stubs/gfdl_mp.f90
   stubs/fms/constants.F90
   stubs/fms/fms_io.F90
+  stubs/fms/fms2_io.F90
   stubs/fms/mpp_domains.F90
   stubs/fms/mpp_io.F90
   stubs/fms/time_manager.F90
@@ -95,7 +96,10 @@ list(APPEND stubs_srcs
   stubs/fms/horiz_interp_type.F90
   stubs/fms/mpp.F90
   stubs/fms/mpp_paramter.F90
-  stubs/fms/tracer_manager.F90)
+  stubs/fms/tracer_manager.F90
+  stubs/fms/platform.F90
+  stubs/fms/amip_interp.F90
+  stubs/fms/fms.F90)
 
 list(APPEND tools_srcs
   tools/coarse_grained_diagnostics.F90
@@ -202,6 +206,7 @@ target_include_directories(fv3 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_D
                                          $<INSTALL_INTERFACE:include/fv3>)
 
 target_include_directories(fv3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                                       ${CMAKE_CURRENT_SOURCE_DIR}/stubs/fms
                                        ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
 target_compile_definitions(fv3 PRIVATE "${fv3_defs}")
