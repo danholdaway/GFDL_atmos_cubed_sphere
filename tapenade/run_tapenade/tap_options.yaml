@@ -1,0 +1,12 @@
+modes: ['tlm']
+#modes: ['adm']
+#modes: ['tlm', 'adm']
+
+variables: [u, v, pt, delp, q, w, delz]
+real_precision: 4
+
+tlm_file_append: tl
+tlm_function_append: tl
+
+adm_file_append: tl
+adm_function_append: tl
