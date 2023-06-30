@@ -14,7 +14,7 @@ procedure (func), pointer :: fmsset_filename_appendix => null ()
 
 private
 
-public restart_file_type
+public restart_file_type, open_namelist_file, open_file, close_file, file_exist, field_exist
 
 integer, parameter, private :: max_split_file = 50
 integer, parameter, private :: max_fields=400
@@ -136,7 +136,37 @@ type restart_file_type
    type(Ptr3Di),   dimension(:,:), pointer  :: p3di => NULL()
 end type restart_file_type
 
-!contains
+contains
+
+integer function open_namelist_file(file)
+   character(len=*), intent(in), optional :: file
+end function open_namelist_file
+
+integer function open_file(file, form, action, access, threading, recl, dist)
+   character(len=*), intent(in) :: file
+   character(len=*), intent(in), optional :: form, action, access, threading
+   integer         , intent(in), optional :: recl
+   logical         , intent(in), optional :: dist  ! Distributed open?
+end function open_file
+
+subroutine close_file(unit, status, dist)
+   integer,          intent(in)           :: unit
+   character(len=*), intent(in), optional :: status
+   logical,          intent(in), optional :: dist
+end subroutine close_file
+
+logical function file_exist(file_name, domain, no_domain)
+   character(len=*), intent(in)         :: file_name
+   type(domain2d), intent(in), optional :: domain
+   logical,        intent(iN), optional :: no_domain
+end function file_exist
+
+logical function field_exist (file_name, field_name, domain, no_domain)
+   character(len=*),                 intent(in) :: file_name
+   character(len=*),                 intent(in) :: field_name
+   type(domain2d), intent(in), optional, target :: domain
+   logical,       intent(in),  optional         :: no_domain
+end function field_exist
 
 end module fms_io_mod
 

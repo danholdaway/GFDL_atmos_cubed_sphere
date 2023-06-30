@@ -1,5 +1,10 @@
 module mpp_domains_mod 
 
+  use platform_mod, only: i8_kind
+
+  use mpp_parameter_mod, only: GLOBAL_DATA_DOMAIN, BGRID_NE, FOLD_NORTH_EDGE, CGRID_NE, MPP_DOMAIN_TIME, &
+                               CYCLIC_GLOBAL_DOMAIN, NUPDATE, EUPDATE, XUPDATE, YUPDATE, SCALAR_PAIR, &
+                               NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST
 implicit none
 private
 
@@ -15,7 +20,14 @@ public DGRID_NE, CGRID_NE, &
        mpp_update_nest_fine, &
        mpp_update_nest_coarse, &
        mpp_group_update_type, &
-       mpp_global_sum, BITWISE_EXACT_SUM
+       mpp_global_sum, BITWISE_EXACT_SUM, GLOBAL_DATA_DOMAIN, BGRID_NE, &
+       FOLD_NORTH_EDGE, MPP_DOMAIN_TIME, CYCLIC_GLOBAL_DOMAIN, &
+       NUPDATE, EUPDATE, XUPDATE, YUPDATE, SCALAR_PAIR, mpp_get_ntile_count, &
+       mpp_global_max, mpp_global_min, mpp_domains_init, mpp_domains_exit, &
+       mpp_broadcast_domain, mpp_check_field, mpp_define_layout, &
+       mpp_define_mosaic_pelist, mpp_get_neighbor_pe, mpp_define_io_domain, &
+       NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST, mpp_start_group_update, &
+       mpp_complete_group_update
 
   !!!!!!!!!FV_ARRAYS!!!!!!!!!!!!
   integer, parameter :: FVPRC = 8
@@ -23,7 +35,9 @@ public DGRID_NE, CGRID_NE, &
   !!!!!!!!!FV_ARRAYS!!!!!!!!!!!!
 
 
-  integer :: DGRID_NE, CGRID_NE
+  integer :: mpp_check_field ! dummy
+  integer :: mpp_domains_exit ! dummy
+  integer :: DGRID_NE
   integer :: mpp_get_global_domain
   integer :: CENTER, CORNER, NORTH, EAST, SOUTH, WEST
   integer :: mpp_get_pelist !dummy
@@ -306,6 +320,52 @@ public DGRID_NE, CGRID_NE, &
 !     integer            :: type_recv(MAX_REQUEST)
 !  end type mpp_group_update_type
 
+  type :: domaincommunicator2D
+  private
+  logical            :: initialized=.false.
+  integer(i8_kind) :: id=-9999
+  integer(i8_kind) :: l_addr  =-9999
+  integer(i8_kind) :: l_addrx =-9999
+  integer(i8_kind) :: l_addry =-9999
+  type(domain2D), pointer :: domain     =>NULL()
+  type(domain2D), pointer :: domain_in  =>NULL()
+  type(domain2D), pointer :: domain_out =>NULL()
+  type(overlapSpec), pointer :: send(:,:,:,:) => NULL()
+  type(overlapSpec), pointer :: recv(:,:,:,:) => NULL()
+  integer, dimension(:,:),       allocatable :: sendis
+  integer, dimension(:,:),       allocatable :: sendie
+  integer, dimension(:,:),       allocatable :: sendjs
+  integer, dimension(:,:),       allocatable :: sendje
+  integer, dimension(:,:),       allocatable :: recvis
+  integer, dimension(:,:),       allocatable :: recvie
+  integer, dimension(:,:),       allocatable :: recvjs
+  integer, dimension(:,:),       allocatable :: recvje
+  logical, dimension(:),         allocatable :: S_do_buf
+  logical, dimension(:),         allocatable :: R_do_buf
+  integer, dimension(:),         allocatable :: cto_pe
+  integer, dimension(:),         allocatable :: cfrom_pe
+  integer, dimension(:),         allocatable :: S_msize
+  integer, dimension(:),         allocatable :: R_msize
+  integer :: Slist_size=0, Rlist_size=0
+  integer :: isize=0, jsize=0, ke=0
+  integer :: isize_in=0, jsize_in=0
+  integer :: isize_out=0, jsize_out=0
+  integer :: isize_max=0, jsize_max=0
+  integer :: gf_ioff=0, gf_joff=0
+! Remote data
+  integer, dimension(:)  , allocatable :: isizeR
+  integer, dimension(:)  , allocatable :: jsizeR
+  integer, dimension(:,:), allocatable :: sendisR
+  integer, dimension(:,:), allocatable :: sendjsR
+  integer(i8_kind), dimension(:), allocatable :: rem_addr
+  integer(i8_kind), dimension(:), allocatable :: rem_addrx
+  integer(i8_kind), dimension(:), allocatable :: rem_addry
+  integer(i8_kind), dimension(:,:), allocatable :: rem_addrl
+  integer(i8_kind), dimension(:,:), allocatable :: rem_addrlx
+  integer(i8_kind), dimension(:,:), allocatable :: rem_addrly
+  integer                             :: position !< data location. T, E, C, or N.
+end type DomainCommunicator2D
+
 
   interface mpp_update_nest_fine
      module procedure mpp_update_nest_fine_2d
@@ -346,10 +406,87 @@ public DGRID_NE, CGRID_NE, &
      module procedure mpp_global_sum_5d
   end interface
 
+  interface mpp_global_max
+  module procedure mpp_global_max_r4
+  module procedure mpp_global_max_r8
+end interface
+
+interface mpp_global_min
+module procedure mpp_global_min_r4
+module procedure mpp_global_min_r8
+end interface
+
  contains
 
+ subroutine mpp_start_group_update(g,d,d_type)
+  type(mpp_group_update_type), intent(inout) :: g !< The data type that store information for group update
+  type(domain2D),               intent(inout) :: d !< contains domain information
+  real                                   , intent(in)     :: d_type
+ end subroutine mpp_start_group_update
 
+ subroutine mpp_complete_group_update(g,d,d_type)
+  type(mpp_group_update_type), intent(inout) :: g !< The data type that store information for group update
+  type(domain2D),               intent(inout) :: d !< contains domain information
+  real                                   , intent(in)     :: d_type
+ end subroutine mpp_complete_group_update
 
+ subroutine mpp_define_io_domain(d, layout)
+  type(domain2d), pointer :: d
+  integer, intent(INOUT) :: layout(2)
+ end subroutine mpp_define_io_domain
+
+ subroutine mpp_define_mosaic_pelist( sizes, pe_start, pe_end, pelist, costpertile)
+  integer, dimension(:), intent(in)           :: sizes
+  integer, dimension(:), intent(inout)        :: pe_start, pe_end
+  integer, dimension(:), intent(in), optional :: pelist, costpertile
+ end subroutine mpp_define_mosaic_pelist
+
+ subroutine mpp_get_neighbor_pe(d, dir, pe)
+  type(domain2d), pointer :: d
+  integer, intent(in) :: dir, pe
+ end subroutine mpp_get_neighbor_pe
+
+ subroutine mpp_define_layout(a,b,layout)
+  integer, intent(IN) :: a(4)
+  integer, intent(inout) :: b
+  integer, intent(INOUT) :: layout(2)
+  end subroutine mpp_define_layout
+
+ subroutine mpp_broadcast_domain(d)
+  type(domain2d), pointer :: d
+ end subroutine mpp_broadcast_domain
+
+ subroutine mpp_domains_init(t)
+  integer, intent(in) :: t
+ end subroutine mpp_domains_init
+
+ function mpp_global_min_r4(d, a)
+  type(domain2d), pointer :: d
+  real(kind=4), pointer, dimension(:,:) :: a
+  real(kind=4) :: mpp_global_min_r4
+ end function mpp_global_min_r4
+
+ function mpp_global_min_r8(d, a)
+  type(domain2d), pointer :: d
+  real(kind=8), pointer, dimension(:,:) :: a
+  real(kind=8) :: mpp_global_min_r8
+ end function mpp_global_min_r8  
+
+ function mpp_global_max_r4(d, a)
+  type(domain2d), pointer :: d
+  real(kind=4), pointer, dimension(:,:) :: a
+  real(kind=4) :: mpp_global_max_r4
+ end function mpp_global_max_r4
+
+ function mpp_global_max_r8(d, a)
+  type(domain2d), pointer :: d
+  real(kind=8), pointer, dimension(:,:) :: a
+  real(kind=8) :: mpp_global_max_r8
+ end function mpp_global_max_r8
+
+integer function mpp_get_ntile_count(d)
+type(domain2d)     :: d
+end function mpp_get_ntile_count
 
 ! mpp_update_domains
 ! ------------------

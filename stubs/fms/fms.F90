@@ -1,51 +1,48 @@
+! use fms_mod,                only: error_mesg, FATAL,                 &
+!                                   check_nml_error, stdlog,           &
+!                                   write_version_number,              &
+!                                   mpp_clock_id, mpp_clock_begin,     &
+!                                   mpp_clock_end, CLOCK_SUBCOMPONENT, &
+!                                   clock_flag_default, open_namelist_file, 
+!                                   close_file,lowercase, file_exist, fms_end, mpp_pe, mpp_root_pe,
 
 module fms_mod
     
-    use          mpp_mod, only:  mpp_error, NOTE, WARNING, FATAL,    &
-                                 mpp_set_warn_level,                 &
-                                 mpp_transmit, ALL_PES,              &
-                                 mpp_pe, mpp_npes, mpp_root_pe,      &
-                                 mpp_sync, mpp_chksum,               &
+    use          mpp_mod, only:  FATAL, mpp_pe, mpp_npes, mpp_root_pe, &
                                  mpp_clock_begin, mpp_clock_end,     &
-                                 mpp_clock_id, mpp_init, mpp_exit,   &
-                                 MPP_CLOCK_SYNC, MPP_CLOCK_DETAILED, &
-                                 CLOCK_COMPONENT, CLOCK_SUBCOMPONENT,&
-                                 CLOCK_MODULE_DRIVER, CLOCK_MODULE,  &
-                                 CLOCK_ROUTINE, CLOCK_LOOP,          &
-                                 CLOCK_INFRA, mpp_clock_set_grain,   &
-                                 mpp_set_stack_size,                 &
-                                 stdin, stdout, stderr, stdlog,      &
-                                 mpp_error_state, lowercase,         &
-                                 uppercase, mpp_broadcast, input_nml_file, &
-                                 get_unit, read_input_nml
+                                 mpp_clock_id,   &
+                                 CLOCK_SUBCOMPONENT,&
+                                 lowercase, stdlog
     
-    use  mpp_domains_mod, only:  domain2D, mpp_define_domains, &
-                                 mpp_update_domains, GLOBAL_DATA_DOMAIN, &
-                                 mpp_domains_init, mpp_domains_exit,     &
-                                 mpp_global_field, mpp_domains_set_stack_size,  &
-                                 mpp_get_compute_domain, mpp_get_global_domain, &
-                                 mpp_get_data_domain
+    ! use  mpp_domains_mod, only:  domain2D, mpp_define_domains, &
+    !                              mpp_update_domains, GLOBAL_DATA_DOMAIN, &
+    !                              mpp_domains_init, mpp_domains_exit,     &
+    !                              mpp_global_field, mpp_domains_set_stack_size,  &
+    !                              mpp_get_compute_domain, mpp_get_global_domain, &
+    !                              mpp_get_data_domain
     
-    use       mpp_io_mod, only:  mpp_io_init, mpp_open, mpp_close,         &
-                           MPP_ASCII, MPP_NATIVE, MPP_IEEE32, MPP_NETCDF,  &
-                           MPP_RDONLY, MPP_WRONLY, MPP_APPEND, MPP_OVERWR, &
-                           MPP_SEQUENTIAL, MPP_DIRECT,                     &
-                           MPP_SINGLE, MPP_MULTI, MPP_DELETE, mpp_io_exit, &
-                           fieldtype, mpp_get_atts, mpp_get_info, mpp_get_fields, &
-                           do_cf_compliance
-    
-    use fms_io_mod, only : fms_io_init, fms_io_exit, field_size, &
-                           read_data, write_data, read_compressed, read_distributed, &
-                           open_namelist_file, open_restart_file, open_ieee32_file, close_file, &
-                           get_domain_decomp, &
-                           open_file, open_direct_file, get_mosaic_tile_grid, &
-                           get_mosaic_tile_file, get_global_att_value, file_exist, field_exist, &
-                           set_domain, nullify_domain
-    use fms2_io_mod, only: fms2_io_init
-    use memutils_mod, only: print_memuse_stats, memutils_init
-    use grid2_mod, only: grid_init, grid_end
-    use fms_string_utils_mod, only: fms_c2f_string, fms_cstring2cpointer, string
-    use platform_mod, only: r4_kind, r8_kind
+    ! use       mpp_io_mod, only:  mpp_io_init, mpp_open, mpp_close,         &
+    !                        MPP_ASCII, MPP_NATIVE, MPP_IEEE32, MPP_NETCDF,  &
+    !                        MPP_RDONLY, MPP_WRONLY, MPP_APPEND, MPP_OVERWR, &
+    !                        MPP_SEQUENTIAL, MPP_DIRECT,                     &
+    !                        MPP_SINGLE, MPP_MULTI, MPP_DELETE, mpp_io_exit, &
+    !                        fieldtype, mpp_get_atts, mpp_get_info, mpp_get_fields, &
+    !                        do_cf_compliance
+  
+    use fms_io_mod, only: open_namelist_file, open_file, close_file, file_exist, field_exist
+    ! use fms_io_mod, only : fms_io_init, fms_io_exit, field_size, &
+    !                        read_data, write_data, read_compressed, read_distributed, &
+    !                        open_namelist_file, open_restart_file, open_ieee32_file, close_file, &
+    !                        get_domain_decomp, &
+    !                        open_file, open_direct_file, get_mosaic_tile_grid, &
+    !                        get_mosaic_tile_file, get_global_att_value, file_exist, field_exist, &
+    !                        set_domain, nullify_domain
+
+    ! use fms2_io_mod, only: fms2_io_init
+    ! use memutils_mod, only: print_memuse_stats, memutils_init
+    ! use grid2_mod, only: grid_init, grid_end
+    ! use fms_string_utils_mod, only: fms_c2f_string, fms_cstring2cpointer, string
+    ! use platform_mod, only: r4_kind, r8_kind
     
     use, intrinsic :: iso_c_binding
     
@@ -56,51 +53,37 @@ module fms_mod
     public :: fms_init, fms_end
     
     ! routines for opening/closing specific types of file
-    public :: open_namelist_file, open_restart_file, &
-              open_ieee32_file, close_file, &
-              open_file, open_direct_file
+    public :: open_namelist_file, &
+              close_file, &
+              open_file
     
     ! routines for reading/writing distributed data
-    public :: read_data, write_data, read_compressed, read_distributed
-    public :: get_domain_decomp, field_size
-    public :: get_global_att_value
+    ! public :: read_data, write_data, read_compressed, read_distributed
+    ! public :: get_domain_decomp, field_size
+    ! public :: get_global_att_value
     
     ! routines for get mosaic information
-    public :: get_mosaic_tile_grid, get_mosaic_tile_file
+    ! public :: get_mosaic_tile_grid, get_mosaic_tile_file
     
     ! miscellaneous i/o routines
     public :: file_exist, check_nml_error, field_exist,     &
-              error_mesg, fms_error_handler
+              error_mesg
     ! version logging routine (originally from fms_io)
     public :: write_version_number
     
     ! miscellaneous utilities (non i/o)
-    public :: lowercase, uppercase,        &
-              string_array_index, monotonic_array, &
-              set_domain, nullify_domain
+    public :: lowercase
     
     ! public mpp interfaces
-    public :: mpp_error, NOTE, WARNING, FATAL, &
-              mpp_error_state,                 &
+    public :: FATAL, &
               mpp_pe, mpp_npes, mpp_root_pe,   &
-              stdin, stdout, stderr, stdlog,   &
-              mpp_chksum, get_unit, read_input_nml
-    public :: input_nml_file
+              stdlog
     public :: mpp_clock_id, mpp_clock_begin, mpp_clock_end
-    public :: MPP_CLOCK_SYNC, MPP_CLOCK_DETAILED
-    public :: CLOCK_COMPONENT, CLOCK_SUBCOMPONENT, &
-              CLOCK_MODULE_DRIVER, CLOCK_MODULE,   &
-              CLOCK_ROUTINE, CLOCK_LOOP, CLOCK_INFRA
-    public :: fms_c2f_string, fms_cstring2cpointer
-    !public from the old fms_io but not exists here
-    public :: string
+    public :: CLOCK_SUBCOMPONENT
     
-    ! public mpp-io interfaces
-    public :: do_cf_compliance
-    
-    interface monotonic_array
-      module procedure :: monotonic_array_r4, monotonic_array_r8
-    end interface monotonic_array
+    ! interface monotonic_array
+    !   module procedure :: monotonic_array_r4, monotonic_array_r8
+    ! end interface monotonic_array
     
     !Balaji
     !this is published by fms and applied to any initialized clocks
@@ -187,8 +170,8 @@ module fms_mod
     subroutine fms_init (localcomm, alt_input_nml_path)
     
     !--- needed to output the version number of constants_mod to the logfile ---
-     use constants_mod, only: constants_version=>version !pjp: PI not computed
-     use fms_io_mod,    only: fms_io_version
+    !  use constants_mod, only: constants_version=>version !pjp: PI not computed
+    !  use fms_io_mod,    only: fms_io_version
     
      integer, intent(in), optional :: localcomm
      character(len=*), intent(in), optional :: alt_input_nml_path

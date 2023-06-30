@@ -99,7 +99,9 @@ list(APPEND stubs_srcs
   stubs/fms/tracer_manager.F90
   stubs/fms/platform.F90
   stubs/fms/amip_interp.F90
-  stubs/fms/fms.F90)
+  stubs/fms/fms.F90
+  stubs/fms/diag_manager.F90
+  stubs/fms/ensemble_manager.F90)
 
 list(APPEND tools_srcs
   tools/coarse_grained_diagnostics.F90
