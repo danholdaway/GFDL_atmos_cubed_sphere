@@ -4,6 +4,8 @@ module mpp_parameter_mod
   implicit none
   private
 
+  integer, parameter, public :: BITWISE_EFP_SUM=2
+  
   integer, parameter :: LONG_KIND = 4
   integer, parameter :: DOUBLE_KIND = 8
 

@@ -1,7 +1,12 @@
 module fms2_io_mod
     use platform_mod, only: r4_kind, r8_kind
     use mpp_domains_mod
+    use fms_io_mod, only: get_mosaic_tile_grid
     implicit none
+
+    public :: open_file, close_file, get_mosaic_tile_grid
+
+    public :: read_data
 
 type, private :: bc_information
   integer, dimension(:), allocatable :: indices !< Indices for the halo region for the variable
@@ -104,8 +109,116 @@ type, extends(FmsNetcdfFile_t), public :: FmsNetcdfDomainFile_t
   logical :: adjust_indices !< Flag telling if indices need to be adjusted
                             !! for domain-decomposed read.
 endtype FmsNetcdfDomainFile_t
+
+interface read_data
+  module procedure read_data_netcdfdomain_1d
+  module procedure read_data_netcdfdomain_2d
+  module procedure read_data_netcdf_char
+  module procedure read_data_netcdf_1d
+  module procedure read_data_netcdf_2d
+end interface
+
+interface open_file
+   module procedure open_file_netcfd
+   module procedure open_file_string
+end interface
+
+interface close_file
+   module procedure close_file_netcfd
+   module procedure close_file_int
+end interface 
     
 contains
+
+integer function open_file_string(file, form, action, access, threading, recl, dist)
+   character(len=*), intent(in) :: file
+   character(len=*), intent(in), optional :: form, action, access, threading
+   integer         , intent(in), optional :: recl
+   logical         , intent(in), optional :: dist  ! Distributed open?
+end function open_file_string
+
+integer function open_file_netcfd(file, form, action, access, threading, recl, dist)
+   type(FmsNetcdfFile_t), intent(in) :: file
+   character(len=*), intent(in), optional :: form, action, access, threading
+   integer         , intent(in), optional :: recl
+   logical         , intent(in), optional :: dist  ! Distributed open?
+end function open_file_netcfd
+
+subroutine close_file_int(unit, status, dist)
+   integer,          intent(in)           :: unit
+   character(len=*), intent(in), optional :: status
+   logical,          intent(in), optional :: dist
+end subroutine close_file_int
+
+subroutine close_file_netcfd(unit, status, dist)
+   type(FmsNetcdfFile_t), intent(in) :: unit
+   character(len=*), intent(in), optional :: status
+   logical,          intent(in), optional :: dist
+end subroutine close_file_netcfd
+
+subroutine get_variable_attribute(file, string, arg, arg2)
+  type(FmsNetcdfFile_t), intent(in) :: file
+  character(len=*), intent(in) :: string, arg
+  character(len=*), intent(inout) :: arg2
+end subroutine get_variable_attribute
+
+subroutine get_global_attribute(file, string, arg)
+  type(FmsNetcdfFile_t), intent(in) :: file
+  character(len=*), intent(in) :: string
+  character(len=*), intent(inout) :: arg
+end subroutine get_global_attribute
+
+subroutine read_data_netcdfdomain_1d(src, string, dst, corner, edge_lengths)
+  type(FmsNetcdfDomainFile_t), intent(in) :: src
+  character(len=*), intent(in) :: string
+  real, intent(inout) :: dst(:)
+  integer, optional, intent(in) :: corner(:), edge_lengths(:)
+end subroutine read_data_netcdfdomain_1d
+
+subroutine read_data_netcdfdomain_2d(src, string, dst, corner, edge_lengths)
+  type(FmsNetcdfDomainFile_t), intent(in) :: src
+  character(len=*), intent(in) :: string
+  real, intent(inout) :: dst(:,:)
+  integer, optional, intent(in) :: corner(:), edge_lengths(:)
+end subroutine read_data_netcdfdomain_2d
+
+subroutine read_data_netcdf_char(src, string, dst, corner, edge_lengths)
+  type(FmsNetcdfFile_t), intent(in) :: src
+  character(len=*), intent(in) :: string
+  character(len=*), intent(inout) :: dst
+  integer, optional, intent(in) :: corner(:), edge_lengths(:)
+end subroutine read_data_netcdf_char
+
+subroutine read_data_netcdf_1d(src, string, dst, corner, edge_lengths)
+  type(FmsNetcdfFile_t), intent(in) :: src
+  character(len=*), intent(in) :: string
+  real, intent(inout) :: dst(:)
+  integer, optional, intent(in) :: corner(:), edge_lengths(:)
+end subroutine read_data_netcdf_1d
+
+subroutine read_data_netcdf_2d(src, string, dst, corner, edge_lengths)
+  type(FmsNetcdfFile_t), intent(in) :: src
+  character(len=*), intent(in) :: string
+  real, intent(inout) :: dst(:,:)
+  integer, optional, intent(in) :: corner(:), edge_lengths(:)
+end subroutine read_data_netcdf_2d
+
+logical function variable_exists(fileobj, variable_name, broadcast)
+  class(FmsNetcdfFile_t), intent(in) :: fileobj !< File object.
+  character(len=*), intent(in) :: variable_name !< Variable name.
+  logical, intent(in), optional :: broadcast !< Flag controlling whether or
+end function variable_exists
+
+logical function file_exists(path) 
+  character(len=*), intent(in) :: path
+end function file_exists
+
+subroutine ascii_read(ascii_filename, ascii_var, num_lines, max_length)
+  character(len=*), intent(in) :: ascii_filename 
+  character(len=:), dimension(:), allocatable, intent(out) :: ascii_var 
+  integer, optional, intent(out) :: num_lines 
+  integer, optional, intent(out) :: max_length
+end subroutine ascii_read
 
 subroutine set_filename_appendix(z)
     character(len=6), intent (in) :: z

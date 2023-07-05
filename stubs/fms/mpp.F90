@@ -3,7 +3,8 @@ module mpp_mod
   ! MPP_DEBUG, NOTE, MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, WARNING
 
 use platform_mod, only: r8_kind, i8_kind
-use mpp_parameter_mod, only: MPP_DEBUG, NOTE, MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, FATAL, WARNING, EVENT_RECV
+use mpp_parameter_mod, only: MPP_DEBUG, NOTE, MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, FATAL, WARNING, &
+                             EVENT_RECV, CLOCK_ROUTINE
 
 implicit none
 private
@@ -13,11 +14,11 @@ public mpp_error, FATAL, mpp_sum, mpp_sync, mpp_npes, mpp_broadcast, WARNING, mp
        mpp_clock_end, mpp_clock_id, lowercase, stdlog, MPP_DEBUG, NOTE, &
        MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, mpp_set_warn_level, mpp_declare_pelist, &
        mpp_set_current_pelist, mpp_chksum, stdout, stderr, EVENT_RECV, mpp_gather, &
-       mpp_get_current_pelist
+       mpp_get_current_pelist, get_unit, CLOCK_ROUTINE, mpp_min
 
 integer, parameter :: NAME_LENGTH = 64
-integer :: mpp_max !dummy
 integer, parameter, public :: CLOCK_SUBCOMPONENT=11
+character(len=:), dimension(:), allocatable, target, public :: input_nml_file
 
 interface mpp_chksum
     module procedure mpp_chksum_r4_2d
@@ -31,11 +32,157 @@ end interface
 interface mpp_gather
     module procedure mpp_gather_i4_1d
     module procedure mpp_gather_r4_1dv
+    module procedure mpp_gather_r8_1dv
     module procedure mpp_gather_pelist_r4_2d
     module procedure mpp_gather_pelist_r8_2d
 end interface
 
+interface mpp_broadcast
+    module procedure mpp_broadcast_i4_1d
+    module procedure mpp_broadcast_r4_0d
+    module procedure mpp_broadcast_r4_1d
+    module procedure mpp_broadcast_r4_2d
+    module procedure mpp_broadcast_r4_3d
+    module procedure mpp_broadcast_r4_4d
+    module procedure mpp_broadcast_i8_1d
+    module procedure mpp_broadcast_r8_0d
+    module procedure mpp_broadcast_r8_1d
+    module procedure mpp_broadcast_r8_2d
+    module procedure mpp_broadcast_r8_3d
+    module procedure mpp_broadcast_r8_4d
+end interface
+
+interface mpp_min
+    module procedure mpp_min_r4
+    module procedure mpp_min_r8
+end interface
+
+interface mpp_max
+    module procedure mpp_max_r4
+    module procedure mpp_max_r8
+end interface
+
+interface mpp_recv
+    module procedure mpp_recv_r4_0d
+    module procedure mpp_recv_r8_0d
+    module procedure mpp_recv_r4_3d
+    module procedure mpp_recv_r8_3d
+    module procedure mpp_recv_i4_0d
+    module procedure mpp_recv_i8_0d
+end interface
+
+interface mpp_send
+    module procedure mpp_send_r4_0d
+    module procedure mpp_send_r8_0d
+    module procedure mpp_send_r4_3d
+    module procedure mpp_send_r8_3d
+    module procedure mpp_send_i4_0d
+    module procedure mpp_send_i8_0d
+end interface
+
+interface mpp_sum
+    module procedure mpp_sum_r4_0d
+    module procedure mpp_sum_r8_0d
+    module procedure mpp_sum_i4_0d
+    module procedure mpp_sum_i8_0d
+end interface
+
 contains
+
+subroutine mpp_sync_self(check)
+  integer, optional, intent(in) :: check
+end subroutine
+
+subroutine mpp_max_r4(arg)
+  real(kind=4), intent(inout) :: arg
+end subroutine mpp_max_r4
+
+subroutine mpp_max_r8(arg)
+  real(kind=8), intent(inout) :: arg
+end subroutine mpp_max_r8
+
+subroutine mpp_min_r4(arg)
+  real(kind=4), intent(inout) :: arg
+end subroutine mpp_min_r4
+
+subroutine mpp_min_r8(arg)
+  real(kind=8), intent(inout) :: arg
+end subroutine mpp_min_r8
+
+integer function get_unit()
+end function get_unit
+
+subroutine mpp_broadcast_i4_1d( data, length, from_pe, pelist )
+  integer(kind=4), intent(inout) :: data(:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_i4_1d
+
+subroutine mpp_broadcast_r4_0d( data, from_pe, pelist )
+  real(kind=4), intent(inout) :: data
+  integer, intent(in) :: from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r4_0d
+
+subroutine mpp_broadcast_r4_1d( data, length, from_pe, pelist )
+  real(kind=4), intent(inout) :: data(:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r4_1d
+
+subroutine mpp_broadcast_r4_2d( data, length, from_pe, pelist )
+  real(kind=4), intent(inout) :: data(:,:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r4_2d
+
+subroutine mpp_broadcast_r4_3d( data, length, from_pe, pelist )
+  real(kind=4), intent(inout) :: data(:,:,:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r4_3d
+
+subroutine mpp_broadcast_r4_4d( data, length, from_pe, pelist )
+  real(kind=4), intent(inout) :: data(:,:,:,:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r4_4d
+
+subroutine mpp_broadcast_i8_1d( data, length, from_pe, pelist )
+  integer(kind=8), intent(inout) :: data(:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_i8_1d
+
+subroutine mpp_broadcast_r8_0d( data, from_pe, pelist )
+  real(kind=8), intent(inout) :: data
+  integer, intent(in) :: from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r8_0d
+
+subroutine mpp_broadcast_r8_1d( data, length, from_pe, pelist )
+  real(kind=8), intent(inout) :: data(:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r8_1d
+
+subroutine mpp_broadcast_r8_2d( data, length, from_pe, pelist )
+  real(kind=8), intent(inout) :: data(:,:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r8_2d
+
+subroutine mpp_broadcast_r8_3d( data, length, from_pe, pelist )
+  real(kind=8), intent(inout) :: data(:,:,:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r8_3d
+
+subroutine mpp_broadcast_r8_4d( data, length, from_pe, pelist )
+  real(kind=8), intent(inout) :: data(:,:,:,:)
+  integer, intent(in) :: length, from_pe
+  integer, intent(in), optional :: pelist(:)
+end subroutine mpp_broadcast_r8_4d
 
 subroutine mpp_get_current_pelist( pelist, name, commID )
   integer, intent(out) :: pelist(:)
@@ -91,24 +238,109 @@ end function mpp_root_pe
 
  endsubroutine mpp_error
 
- subroutine mpp_sum(tilelist,npes)
-  integer, intent(in) :: tilelist(:), npes
- endsubroutine mpp_sum
+ subroutine mpp_sum_r4_0d(val,npes)
+  real(kind=4), intent(in) :: val
+  integer, optional, intent(in) :: npes
+ endsubroutine mpp_sum_r4_0d
 
- subroutine mpp_broadcast(field,fsize,n,pelist)
-  real(r8_kind), intent(inout) :: field(:,:,:)
-  integer, intent(in) :: fsize,n,pelist(:)
- endsubroutine mpp_broadcast
+ subroutine mpp_sum_r8_0d(val,npes)
+  real(kind=8), intent(in) :: val
+  integer, optional, intent(in) :: npes
+ endsubroutine mpp_sum_r8_0d
 
- subroutine mpp_send(field,fieldsize,recv_proc)
-  real(r8_kind), intent(inout) :: field(:,:,:)
-  integer, intent(in) :: fieldsize, recv_proc
- endsubroutine mpp_send
+ subroutine mpp_sum_i4_0d(val,npes)
+  integer(kind=4), intent(in) :: val
+  integer, optional, intent(in) :: npes
+ endsubroutine mpp_sum_i4_0d
 
- subroutine mpp_recv(field,fieldsize,send_proc)
-  real(r8_kind), intent(inout) :: field(:,:,:)
-  integer, intent(in) :: fieldsize, send_proc
- endsubroutine mpp_recv
+ subroutine mpp_sum_i8_0d(val,npes)
+  integer(kind=8), intent(in) :: val
+  integer, optional, intent(in) :: npes
+ endsubroutine mpp_sum_i8_0d
+
+ subroutine mpp_send_r4_0d(field,plen,to_pe,block)
+  real(kind=4), intent(inout) :: field
+  integer, optional, intent(in) :: plen
+  integer, optional, intent(in) :: to_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_send_r4_0d
+
+ subroutine mpp_send_r8_0d(field,plen,to_pe,block)
+  real(kind=8), intent(inout) :: field
+  integer, optional, intent(in) :: plen
+  integer, optional, intent(in) :: to_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_send_r8_0d
+
+ subroutine mpp_send_r4_3d(field,plen,to_pe,block)
+  real(kind=4), intent(inout) :: field(:,:,:)
+  integer, optional, intent(in) :: plen
+  integer, optional, intent(in) :: to_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_send_r4_3d
+
+ subroutine mpp_send_r8_3d(field,plen,to_pe,block)
+  real(kind=8), intent(inout) :: field(:,:,:)
+  integer, optional, intent(in) :: plen
+  integer, optional, intent(in) :: to_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_send_r8_3d
+
+ subroutine mpp_send_i4_0d(field,plen,to_pe,block)
+  integer(kind=4), intent(inout) :: field
+  integer, optional, intent(in) :: plen
+  integer, optional, intent(in) :: to_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_send_i4_0d
+
+ subroutine mpp_send_i8_0d(field,plen,to_pe,block)
+  integer(kind=8), intent(inout) :: field
+  integer, optional, intent(in) :: plen
+  integer, optional, intent(in) :: to_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_send_i8_0d
+
+ subroutine mpp_recv_r4_0d(field,glen,from_pe,block)
+  real(kind=4), intent(inout) :: field
+  integer, optional, intent(in) :: glen
+  integer, optional, intent(in) :: from_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_recv_r4_0d
+
+ subroutine mpp_recv_r8_0d(field,glen,from_pe,block)
+  real(kind=8), intent(inout) :: field
+  integer, optional, intent(in) :: glen
+  integer, optional, intent(in) :: from_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_recv_r8_0d
+
+ subroutine mpp_recv_r4_3d(field,glen,from_pe,block)
+  real(kind=4), intent(inout) :: field(:,:,:)
+  integer, optional, intent(in) :: glen
+  integer, optional, intent(in) :: from_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_recv_r4_3d
+
+ subroutine mpp_recv_r8_3d(field,glen,from_pe,block)
+  real(kind=8), intent(inout) :: field(:,:,:)
+  integer, optional, intent(in) :: glen
+  integer, optional, intent(in) :: from_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_recv_r8_3d
+
+ subroutine mpp_recv_i4_0d(field,glen,from_pe,block)
+  integer(kind=4), intent(inout) :: field
+  integer, optional, intent(in) :: glen
+  integer, optional, intent(in) :: from_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_recv_i4_0d
+
+ subroutine mpp_recv_i8_0d(field,glen,from_pe,block)
+  integer(kind=8), intent(inout) :: field
+  integer, optional, intent(in) :: glen
+  integer, optional, intent(in) :: from_pe
+  logical, optional, intent(in) :: block
+ endsubroutine mpp_recv_i8_0d
 
  subroutine mpp_gather_i4_1d(sbuf, rbuf, pelist)
   integer, dimension(:),    intent(in) :: sbuf
@@ -123,6 +355,14 @@ end function mpp_root_pe
   integer,   dimension(:),    intent(in) :: rsize
   integer,   dimension(:),    intent(in), optional :: pelist(:)
  end subroutine mpp_gather_r4_1dv
+
+ subroutine mpp_gather_r8_1dv(sbuf, ssize, rbuf, rsize, pelist)
+  real(kind=8), dimension(:),    intent(in) :: sbuf
+  real(kind=8), dimension(:), intent(inout) :: rbuf
+  integer,                    intent(in) :: ssize
+  integer,   dimension(:),    intent(in) :: rsize
+  integer,   dimension(:),    intent(in), optional :: pelist(:)
+ end subroutine mpp_gather_r8_1dv
 
  
  subroutine mpp_gather_pelist_r4_2d(is, ie, js, je, pelist, array_seg, data, is_root_pe, &
@@ -145,14 +385,9 @@ logical,                           intent(in)    :: is_root_pe
 integer,   optional,               intent(in)    :: ishift, jshift
  end subroutine mpp_gather_pelist_r8_2d
 
-
  subroutine mpp_sync
   print*, 'mpp_sync'
  endsubroutine mpp_sync
-
- subroutine mpp_sync_self
-  print*, 'mpp_sync_self'
- endsubroutine mpp_sync_self
 
 subroutine mpp_set_warn_level(flag)
   integer, intent(in) :: flag

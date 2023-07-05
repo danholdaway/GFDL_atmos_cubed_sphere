@@ -11,8 +11,10 @@ module fms_mod
     use          mpp_mod, only:  FATAL, mpp_pe, mpp_npes, mpp_root_pe, &
                                  mpp_clock_begin, mpp_clock_end,     &
                                  mpp_clock_id,   &
-                                 CLOCK_SUBCOMPONENT,&
+                                 CLOCK_SUBCOMPONENT, CLOCK_ROUTINE,&
                                  lowercase, stdlog
+
+    
     
     ! use  mpp_domains_mod, only:  domain2D, mpp_define_domains, &
     !                              mpp_update_domains, GLOBAL_DATA_DOMAIN, &
@@ -29,7 +31,8 @@ module fms_mod
     !                        fieldtype, mpp_get_atts, mpp_get_info, mpp_get_fields, &
     !                        do_cf_compliance
   
-    use fms_io_mod, only: open_namelist_file, open_file, close_file, file_exist, field_exist
+    use fms_io_mod, only: open_namelist_file, file_exist, field_exist, &
+                          get_mosaic_tile_grid
     ! use fms_io_mod, only : fms_io_init, fms_io_exit, field_size, &
     !                        read_data, write_data, read_compressed, read_distributed, &
     !                        open_namelist_file, open_restart_file, open_ieee32_file, close_file, &
@@ -38,7 +41,7 @@ module fms_mod
     !                        get_mosaic_tile_file, get_global_att_value, file_exist, field_exist, &
     !                        set_domain, nullify_domain
 
-    ! use fms2_io_mod, only: fms2_io_init
+    use fms2_io_mod, only: open_file, close_file
     ! use memutils_mod, only: print_memuse_stats, memutils_init
     ! use grid2_mod, only: grid_init, grid_end
     ! use fms_string_utils_mod, only: fms_c2f_string, fms_cstring2cpointer, string
@@ -49,6 +52,7 @@ module fms_mod
     implicit none
     private
     
+    public :: CLOCK_ROUTINE
     ! routines for initialization and termination of module
     public :: fms_init, fms_end
     

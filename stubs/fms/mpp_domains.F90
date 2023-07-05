@@ -4,14 +4,15 @@ module mpp_domains_mod
 
   use mpp_parameter_mod, only: GLOBAL_DATA_DOMAIN, BGRID_NE, FOLD_NORTH_EDGE, CGRID_NE, MPP_DOMAIN_TIME, &
                                CYCLIC_GLOBAL_DOMAIN, NUPDATE, EUPDATE, XUPDATE, YUPDATE, SCALAR_PAIR, &
-                               NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST
+                               NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST, AGRID, DGRID_NE, &
+                               BITWISE_EFP_SUM
 implicit none
 private
 
 public DGRID_NE, CGRID_NE, &
        mpp_get_boundary, mpp_update_domains, &
        nest_domain_type, &
-       domain1d, domain2d, &
+       domain1d, domain2d, domainUG, &
        mpp_get_data_domain, mpp_get_compute_domain, mpp_get_global_domain, &
        CENTER, CORNER, NORTH, EAST, SOUTH, WEST, &
        mpp_get_pelist, &
@@ -27,7 +28,11 @@ public DGRID_NE, CGRID_NE, &
        mpp_broadcast_domain, mpp_check_field, mpp_define_layout, &
        mpp_define_mosaic_pelist, mpp_get_neighbor_pe, mpp_define_io_domain, &
        NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST, mpp_start_group_update, &
-       mpp_complete_group_update
+       mpp_complete_group_update, domaincommunicator2D, mpp_define_mosaic, &
+       mpp_group_update_initialized, mpp_create_group_update, mpp_reset_group_update_field, &
+       mpp_get_io_domain_layout, mpp_get_layout, mpp_copy_domain, mpp_do_group_update, &
+       mpp_get_domain_shift, AGRID, BITWISE_EFP_SUM, mpp_get_tile_id, mpp_get_compute_domains
+
 
   !!!!!!!!!FV_ARRAYS!!!!!!!!!!!!
   integer, parameter :: FVPRC = 8
@@ -37,10 +42,8 @@ public DGRID_NE, CGRID_NE, &
 
   integer :: mpp_check_field ! dummy
   integer :: mpp_domains_exit ! dummy
-  integer :: DGRID_NE
-  integer :: mpp_get_global_domain
+  integer :: mpp_get_domain_shift ! dummy
   integer :: CENTER, CORNER, NORTH, EAST, SOUTH, WEST
-  integer :: mpp_get_pelist !dummy
   integer, parameter :: BITWISE_EXACT_SUM = 1
 
   integer, parameter :: MAXOVERLAP = 100
@@ -207,6 +210,25 @@ public DGRID_NE, CGRID_NE, &
      type(domain2d),     pointer :: io_domain     => NULL() ! domain for IO, will be set through calling mpp_set_io_domain ( this will be changed).
   end type domain2D   
 
+type :: domainUG
+  private
+  ! type(unstruct_axis_spec) :: compute, global !< axis specifications
+  ! type(unstruct_domain_spec), pointer :: list(:)=>NULL() !<
+  ! type(domainUG), pointer :: io_domain=>NULL() !<
+  ! type(unstruct_pass_type) :: SG2UG
+  ! type(unstruct_pass_type) :: UG2SG
+  ! integer, pointer :: grid_index(:) => NULL() !< index of grid on current pe
+  ! type(domain2d), pointer :: SG_domain => NULL()
+  integer :: pe
+  integer :: pos
+  integer :: ntiles
+  integer :: tile_id
+  integer :: tile_root_pe
+  integer :: tile_npes
+  integer :: npes_io_group
+  integer(kind=4) :: io_layout
+end type domainUG
+
   type nest_domain_type
      private
      integer                    :: tile_fine, tile_coarse
@@ -368,9 +390,28 @@ end type DomainCommunicator2D
 
 
   interface mpp_update_nest_fine
-     module procedure mpp_update_nest_fine_2d
-     module procedure mpp_update_nest_fine_3d
-     module procedure mpp_update_nest_fine_4d
+     module procedure mpp_update_nest_fine_r4_2d
+     module procedure mpp_update_nest_fine_r4_3d
+     module procedure mpp_update_nest_fine_r4_4d
+     module procedure mpp_update_nest_fine_r4_2d_v
+     module procedure mpp_update_nest_fine_r4_3d_v
+     module procedure mpp_update_nest_fine_r8_2d
+     module procedure mpp_update_nest_fine_r8_3d
+     module procedure mpp_update_nest_fine_r8_4d
+     module procedure mpp_update_nest_fine_r8_2d_v
+     module procedure mpp_update_nest_fine_r8_3d_v
+  end interface
+
+
+  interface mpp_update_nest_coarse
+     module procedure mpp_update_nest_coarse_r4_2d
+     module procedure mpp_update_nest_coarse_r4_3d
+     module procedure mpp_update_nest_coarse_r4_4d
+     module procedure mpp_update_nest_coarse_r4_3d_v
+     module procedure mpp_update_nest_coarse_r8_2d
+     module procedure mpp_update_nest_coarse_r8_3d
+     module procedure mpp_update_nest_coarse_r8_4d
+     module procedure mpp_update_nest_coarse_r8_3d_v
   end interface
 
   interface mpp_global_field
@@ -399,14 +440,14 @@ end type DomainCommunicator2D
      module procedure mpp_update_domain2D_r8_5dv
   end interface
 
-  interface mpp_global_sum
+interface mpp_global_sum
      module procedure mpp_global_sum_2d
      module procedure mpp_global_sum_3d
      module procedure mpp_global_sum_4d
      module procedure mpp_global_sum_5d
-  end interface
+end interface
 
-  interface mpp_global_max
+interface mpp_global_max
   module procedure mpp_global_max_r4
   module procedure mpp_global_max_r8
 end interface
@@ -416,7 +457,292 @@ module procedure mpp_global_min_r4
 module procedure mpp_global_min_r8
 end interface
 
+interface mpp_create_group_update
+module procedure mpp_create_group_update_r4_2d
+module procedure mpp_create_group_update_r4_3d
+module procedure mpp_create_group_update_r4_4d
+module procedure mpp_create_group_update_r4_2dv
+module procedure mpp_create_group_update_r4_3dv
+module procedure mpp_create_group_update_r8_2d
+module procedure mpp_create_group_update_r8_3d
+module procedure mpp_create_group_update_r8_4d
+module procedure mpp_create_group_update_r8_2dv
+module procedure mpp_create_group_update_r8_3dv
+end interface mpp_create_group_update
+
+interface mpp_reset_group_update_field
+module procedure mpp_reset_group_update_field_r4_2d
+module procedure mpp_reset_group_update_field_r4_3d
+module procedure mpp_reset_group_update_field_r4_4d
+module procedure mpp_reset_group_update_field_r4_2dv
+module procedure mpp_reset_group_update_field_r4_3dv
+module procedure mpp_reset_group_update_field_r8_2d
+module procedure mpp_reset_group_update_field_r8_3d
+module procedure mpp_reset_group_update_field_r8_4d
+module procedure mpp_reset_group_update_field_r8_2dv
+module procedure mpp_reset_group_update_field_r8_3dv
+end interface mpp_reset_group_update_field
+
+interface mpp_get_boundary
+module procedure mpp_get_boundary_2d
+module procedure mpp_get_boundary_3d
+end interface
+
  contains
+
+ subroutine mpp_get_global_domain( domain, xbegin, xend, ybegin, yend, xsize, xmax_size, ysize, ymax_size, &
+  tile_count, position )
+type(domain2D),     intent(in) :: domain
+integer, intent(out), optional :: xbegin, xend, ybegin, yend, xsize, xmax_size, ysize, ymax_size
+integer, intent(in),  optional :: tile_count, position
+ end subroutine mpp_get_global_domain
+
+ subroutine mpp_get_pelist( domain, pelist, pos )
+  type(domain2D),     intent(in) :: domain
+  integer,           intent(out) :: pelist(:)
+  integer, intent(out), optional :: pos
+end subroutine mpp_get_pelist
+
+subroutine mpp_get_compute_domains( domain, xbegin, xend, xsize, ybegin, yend, ysize, position )
+  type(domain2D),                   intent(in) :: domain
+  integer, intent(out), optional, dimension(:) :: xbegin, xend, xsize, ybegin, yend, ysize
+  integer, intent(in ), optional               :: position
+end subroutine mpp_get_compute_domains
+
+ integer function mpp_get_tile_id(domain)
+  type(domain2D),       intent(inout)        :: domain
+ end function mpp_get_tile_id
+
+ subroutine mpp_copy_domain(domain, domain_for_read)
+  type(domain2D),       intent(inout)        :: domain, domain_for_read
+ end subroutine mpp_copy_domain
+
+ subroutine mpp_get_layout(domain, layout)
+  type(domain2D),       intent(inout)        :: domain
+  integer, intent(inout) :: layout(2)
+ end subroutine mpp_get_layout
+
+ function mpp_get_io_domain_layout(domain)
+  type(domain2D),       intent(inout)        :: domain
+  integer :: mpp_get_io_domain_layout(2)
+ end function mpp_get_io_domain_layout
+
+ subroutine mpp_reset_group_update_field_r4_2d(group, field)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),            intent(inout)        :: field(:,:)
+
+end subroutine mpp_reset_group_update_field_r4_2d
+
+subroutine mpp_reset_group_update_field_r8_2d(group, field)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),            intent(inout)        :: field(:,:)
+
+end subroutine mpp_reset_group_update_field_r8_2d
+
+subroutine mpp_reset_group_update_field_r4_3d(group, field)
+  type(mpp_group_update_type), intent(inout) :: group
+  real(kind=4),            intent(inout)        :: field(:,:,:)
+  
+  end subroutine mpp_reset_group_update_field_r4_3d
+  
+  subroutine mpp_reset_group_update_field_r8_3d(group, field)
+  type(mpp_group_update_type), intent(inout) :: group
+  real(kind=8),            intent(inout)        :: field(:,:,:)
+  
+  end subroutine mpp_reset_group_update_field_r8_3d
+
+subroutine mpp_reset_group_update_field_r4_4d(group, field)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),            intent(inout)        :: field(:,:,:,:)
+
+end subroutine mpp_reset_group_update_field_r4_4d
+
+subroutine mpp_reset_group_update_field_r8_4d(group, field)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),            intent(inout)        :: field(:,:,:,:)
+
+end subroutine mpp_reset_group_update_field_r8_4d
+
+subroutine mpp_reset_group_update_field_r4_2dv( group, fieldx, fieldy)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),        intent(inout)            :: fieldx(:,:), fieldy(:,:)
+
+end subroutine mpp_reset_group_update_field_r4_2dv
+
+subroutine mpp_reset_group_update_field_r8_2dv( group, fieldx, fieldy)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),        intent(inout)            :: fieldx(:,:), fieldy(:,:)
+
+end subroutine mpp_reset_group_update_field_r8_2dv
+
+subroutine mpp_reset_group_update_field_r4_3dv( group, fieldx, fieldy)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),        intent(inout)            :: fieldx(:,:,:), fieldy(:,:,:)
+
+end subroutine mpp_reset_group_update_field_r4_3dv
+
+subroutine mpp_reset_group_update_field_r8_3dv( group, fieldx, fieldy)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),        intent(inout)            :: fieldx(:,:,:), fieldy(:,:,:)
+
+end subroutine mpp_reset_group_update_field_r8_3dv
+
+subroutine mpp_create_group_update_r4_2d(group, field, domain, flags, position, &
+  whalo, ehalo, shalo, nhalo)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),            intent(inout)        :: field(:,:)
+type(domain2D),       intent(inout)        :: domain
+integer,              intent(in), optional :: flags
+integer,              intent(in), optional :: position
+integer,              intent(in), optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r4_2d
+
+subroutine mpp_create_group_update_r8_2d(group, field, domain, flags, position, &
+  whalo, ehalo, shalo, nhalo)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),            intent(inout)        :: field(:,:)
+type(domain2D),       intent(inout)        :: domain
+integer,              intent(in), optional :: flags
+integer,              intent(in), optional :: position
+integer,              intent(in), optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r8_2d
+
+subroutine mpp_create_group_update_r4_3d(group, field, domain, flags, position, &
+  whalo, ehalo, shalo, nhalo)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),            intent(inout)        :: field(:,:,:)
+type(domain2D),       intent(inout)        :: domain
+integer,              intent(in), optional :: flags
+integer,              intent(in), optional :: position
+integer,              intent(in), optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r4_3d
+
+subroutine mpp_create_group_update_r8_3d(group, field, domain, flags, position, &
+  whalo, ehalo, shalo, nhalo)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),            intent(inout)        :: field(:,:,:)
+type(domain2D),       intent(inout)        :: domain
+integer,              intent(in), optional :: flags
+integer,              intent(in), optional :: position
+integer,              intent(in), optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r8_3d
+
+subroutine mpp_create_group_update_r4_4d(group, field, domain, flags, position, &
+  whalo, ehalo, shalo, nhalo)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),            intent(inout)        :: field(:,:,:,:)
+type(domain2D),       intent(inout)        :: domain
+integer,              intent(in), optional :: flags
+integer,              intent(in), optional :: position
+integer,              intent(in), optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r4_4d
+
+subroutine mpp_create_group_update_r8_4d(group, field, domain, flags, position, &
+  whalo, ehalo, shalo, nhalo)
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),            intent(inout)        :: field(:,:,:,:)
+type(domain2D),       intent(inout)        :: domain
+integer,              intent(in), optional :: flags
+integer,              intent(in), optional :: position
+integer,              intent(in), optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r8_4d
+
+subroutine mpp_create_group_update_r4_2dv( group, fieldx, fieldy, domain, flags, gridtype, &
+  whalo, ehalo, shalo, nhalo)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),        intent(inout)            :: fieldx(:,:), fieldy(:,:)
+type(domain2D),   intent(inout)            :: domain
+integer,          intent(in),     optional :: flags, gridtype
+integer,          intent(in),     optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r4_2dv
+
+subroutine mpp_create_group_update_r8_2dv( group, fieldx, fieldy, domain, flags, gridtype, &
+  whalo, ehalo, shalo, nhalo)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),        intent(inout)            :: fieldx(:,:), fieldy(:,:)
+type(domain2D),   intent(inout)            :: domain
+integer,          intent(in),     optional :: flags, gridtype
+integer,          intent(in),     optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r8_2dv
+
+subroutine mpp_create_group_update_r4_3dv( group, fieldx, fieldy, domain, flags, gridtype, &
+  whalo, ehalo, shalo, nhalo)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=4),        intent(inout)            :: fieldx(:,:,:), fieldy(:,:,:)
+type(domain2D),   intent(inout)            :: domain
+integer,          intent(in),     optional :: flags, gridtype
+integer,          intent(in),     optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r4_3dv
+
+subroutine mpp_create_group_update_r8_3dv( group, fieldx, fieldy, domain, flags, gridtype, &
+  whalo, ehalo, shalo, nhalo)
+
+type(mpp_group_update_type), intent(inout) :: group
+real(kind=8),        intent(inout)            :: fieldx(:,:,:), fieldy(:,:,:)
+type(domain2D),   intent(inout)            :: domain
+integer,          intent(in),     optional :: flags, gridtype
+integer,          intent(in),     optional :: whalo, ehalo, shalo, nhalo
+
+end subroutine mpp_create_group_update_r8_3dv
+
+ subroutine mpp_do_group_update(group, domain, d_type)
+  type(mpp_group_update_type), intent(in) :: group
+  type(domain2d),               intent(inout) :: domain
+  real                                        :: d_type
+ end subroutine
+
+ function mpp_group_update_initialized(group)
+  type(mpp_group_update_type), intent(in) :: group
+  logical :: mpp_group_update_initialized
+
+end function mpp_group_update_initialized
+
+ subroutine mpp_define_mosaic( global_indices, layout, domain, num_tile, num_contact, tile1, tile2,      &
+  istart1, iend1, jstart1, jend1, istart2, iend2, jstart2, jend2, pe_start, &
+  pe_end, pelist, whalo, ehalo, shalo, nhalo, xextent, yextent,             &
+  maskmap, name, memory_size, symmetry, xflags, yflags, tile_id )
+integer,          intent(in)           :: global_indices(:,:)  !>The size of first indice is 4,
+                                     !! (/ isg, ieg, jsg, jeg /)
+                                     !!The size of second indice
+                                     !!is number of tiles in mosaic.
+integer,          intent(in)           :: layout(:,:)
+type(domain2D),   intent(inout)        :: domain
+integer,          intent(in)           :: num_tile             !< number of tiles in the mosaic
+integer,          intent(in)           :: num_contact          !< number of contact region between tiles.
+integer,          intent(in)           :: tile1(:), tile2(:)   !< tile number
+integer,          intent(in)           :: istart1(:), iend1(:) !< i-index in tile_1 of contact region
+integer,          intent(in)           :: jstart1(:), jend1(:) !< j-index in tile_1 of contact region
+integer,          intent(in)           :: istart2(:), iend2(:) !< i-index in tile_2 of contact region
+integer,          intent(in)           :: jstart2(:), jend2(:) !< j-index in tile_2 of contact region
+integer,          intent(in)           :: pe_start(:)          !< start pe of the pelist used in each tile
+integer,          intent(in)           :: pe_end(:)            !< end pe of the pelist used in each tile
+integer,          intent(in), optional :: pelist(:)            !< list of processors used in mosaic
+integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+integer,          intent(in), optional :: xextent(:,:), yextent(:,:)
+logical,          intent(in), optional :: maskmap(:,:,:)
+character(len=*), intent(in), optional :: name
+integer,          intent(in), optional :: memory_size(2)
+logical,          intent(in), optional :: symmetry
+integer,          intent(in), optional :: xflags, yflags
+integer,          intent(in), optional :: tile_id(:)           !< tile_id of each tile in the mosaic
+
+end subroutine
 
  subroutine mpp_start_group_update(g,d,d_type)
   type(mpp_group_update_type), intent(inout) :: g !< The data type that store information for group update
@@ -430,9 +756,9 @@ end interface
   real                                   , intent(in)     :: d_type
  end subroutine mpp_complete_group_update
 
- subroutine mpp_define_io_domain(d, layout)
-  type(domain2d), pointer :: d
-  integer, intent(INOUT) :: layout(2)
+ subroutine mpp_define_io_domain(domain, layout)
+  type(domain2D), intent(inout) :: domain !< Input 2D domain
+  integer,        intent(in   ) :: layout(2) !< 2 value io pe layout to define
  end subroutine mpp_define_io_domain
 
  subroutine mpp_define_mosaic_pelist( sizes, pe_start, pe_end, pelist, costpertile)
@@ -452,8 +778,8 @@ end interface
   integer, intent(INOUT) :: layout(2)
   end subroutine mpp_define_layout
 
- subroutine mpp_broadcast_domain(d)
-  type(domain2d), pointer :: d
+ subroutine mpp_broadcast_domain(domain)
+  type(domain2d), intent(inout) :: domain
  end subroutine mpp_broadcast_domain
 
  subroutine mpp_domains_init(t)
@@ -461,26 +787,26 @@ end interface
  end subroutine mpp_domains_init
 
  function mpp_global_min_r4(d, a)
-  type(domain2d), pointer :: d
-  real(kind=4), pointer, dimension(:,:) :: a
+  type(domain2d), intent(in) :: d
+  real(kind=4), intent(in), dimension(:,:) :: a
   real(kind=4) :: mpp_global_min_r4
  end function mpp_global_min_r4
 
  function mpp_global_min_r8(d, a)
-  type(domain2d), pointer :: d
-  real(kind=8), pointer, dimension(:,:) :: a
+  type(domain2d), intent(in) :: d
+  real(kind=8), intent(in), dimension(:,:) :: a
   real(kind=8) :: mpp_global_min_r8
  end function mpp_global_min_r8  
 
  function mpp_global_max_r4(d, a)
-  type(domain2d), pointer :: d
-  real(kind=4), pointer, dimension(:,:) :: a
+  type(domain2d), intent(in) :: d
+  real(kind=4), dimension(:,:) :: a
   real(kind=4) :: mpp_global_max_r4
  end function mpp_global_max_r4
 
  function mpp_global_max_r8(d, a)
-  type(domain2d), pointer :: d
-  real(kind=8), pointer, dimension(:,:) :: a
+  type(domain2d), intent(in) :: d
+  real(kind=8), intent(in), dimension(:,:) :: a
   real(kind=8) :: mpp_global_max_r8
  end function mpp_global_max_r8
 
@@ -491,192 +817,174 @@ end function mpp_get_ntile_count
 ! mpp_update_domains
 ! ------------------
 
- subroutine mpp_update_domain2D_r4_2d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-
+ subroutine mpp_update_domain2D_r4_2d( field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: field(:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_2d
- subroutine mpp_update_domain2D_r4_3d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-
+ subroutine mpp_update_domain2D_r4_3d(field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: field(:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_3d
- subroutine mpp_update_domain2D_r4_4d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:,:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-
+ subroutine mpp_update_domain2D_r4_4d(field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: field(:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_4d
- subroutine mpp_update_domain2D_r4_5d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:,:,:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-
+ subroutine mpp_update_domain2D_r4_5d(field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: field(:,:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_5d
- subroutine mpp_update_domain2D_r4_2dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:), field2(:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-  field2 = 2*field2
-
+ subroutine mpp_update_domain2D_r4_2dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: fieldx(:,:), fieldy(:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_2dv
- subroutine mpp_update_domain2D_r4_3dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:,:), field2(:,:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-  field2 = 2*field2
-
-
+ subroutine mpp_update_domain2D_r4_3dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: fieldx(:,:,:), fieldy(:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_3dv
- subroutine mpp_update_domain2D_r4_4dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:,:,:), field2(:,:,:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-  field2 = 2*field2
-
+ subroutine mpp_update_domain2D_r4_4dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: fieldx(:,:,:,:), fieldy(:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_4dv
- subroutine mpp_update_domain2D_r4_5dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-  real(kind=4), intent(inout) :: field1(:,:,:,:,:), field2(:,:,:,:,:)
-  type(domain2d), intent(in) :: domain
-  integer, optional, intent(in) :: gridtype
-  logical, optional, intent(in) :: complete
-  integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
-
-  field1 = 2*field1
-  field2 = 2*field2
-
+ subroutine mpp_update_domain2D_r4_5dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=4),        intent(inout)        :: fieldx(:,:,:,:,:), fieldy(:,:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r4_5dv
 
- subroutine mpp_update_domain2D_r8_2d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
-
-   real(kind=8), intent(inout) :: field1(:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
- 
+ subroutine mpp_update_domain2D_r8_2d( field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: field(:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_2d
- subroutine mpp_update_domain2D_r8_3d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
- 
-   real(kind=8), intent(inout) :: field1(:,:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
- 
+ subroutine mpp_update_domain2D_r8_3d(field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: field(:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_3d
- subroutine mpp_update_domain2D_r8_4d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
- 
-   real(kind=8), intent(inout) :: field1(:,:,:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
- 
+ subroutine mpp_update_domain2D_r8_4d(field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: field(:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_4d
- subroutine mpp_update_domain2D_r8_5d(field1,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
- 
-   real(kind=8), intent(inout) :: field1(:,:,:,:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
- 
+ subroutine mpp_update_domain2D_r8_5d(field, domain, flags, complete, position, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: field(:,:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: position
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_5d
- subroutine mpp_update_domain2D_r8_2dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
- 
-   real(kind=8), intent(inout) :: field1(:,:), field2(:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
-   field2 = 2*field2
- 
+ subroutine mpp_update_domain2D_r8_2dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: fieldx(:,:), fieldy(:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_2dv
- subroutine mpp_update_domain2D_r8_3dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
- 
-   real(kind=8), intent(inout) :: field1(:,:,:), field2(:,:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
-   field2 = 2*field2
- 
- 
+ subroutine mpp_update_domain2D_r8_3dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: fieldx(:,:,:), fieldy(:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_3dv
- subroutine mpp_update_domain2D_r8_4dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
- 
-   real(kind=8), intent(inout) :: field1(:,:,:,:), field2(:,:,:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
-   field2 = 2*field2
- 
+ subroutine mpp_update_domain2D_r8_4dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: fieldx(:,:,:,:), fieldy(:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_4dv
- subroutine mpp_update_domain2D_r8_5dv(field1,field2,domain,gridtype,complete,whalo,ehalo,shalo,nhalo)
- 
-   real(kind=8), intent(inout) :: field1(:,:,:,:,:), field2(:,:,:,:,:)
-   type(domain2d), intent(in) :: domain
-   integer, optional, intent(in) :: gridtype
-   logical, optional, intent(in) :: complete
-   integer, optional, intent(in) :: whalo,ehalo,shalo,nhalo
- 
-   field1 = 2*field1
-   field2 = 2*field2
- 
+ subroutine mpp_update_domain2D_r8_5dv(fieldx, fieldy, domain, flags, gridtype, complete, &
+  whalo, ehalo, shalo, nhalo, name, tile_count)
+    real(kind=8),        intent(inout)        :: fieldx(:,:,:,:,:), fieldy(:,:,:,:,:)
+    type(domain2D),   intent(inout)        :: domain
+    integer,          intent(in), optional :: flags, gridtype
+    logical,          intent(in), optional :: complete
+    integer,          intent(in), optional :: whalo, ehalo, shalo, nhalo
+    character(len=*), intent(in), optional :: name
+    integer,          intent(in), optional :: tile_count
  endsubroutine mpp_update_domain2D_r8_5dv
 
 
@@ -684,23 +992,24 @@ end function mpp_get_ntile_count
 ! mpp_get_boundary
 ! ----------------
 
- subroutine mpp_get_boundary(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype)
-
-  real(FVPRC), intent(inout) :: field1(:,:,:),field2(:,:,:)
+ subroutine mpp_get_boundary_2d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
+  real(R_GRID), intent(inout) :: field1(:,:),field2(:,:)
   type(domain2d), intent(in) :: domain
-  real(FVPRC), optional, intent(inout) :: wbuffery(:,:),ebuffery(:,:),sbuffery(:,:),nbuffery(:,:)
-  real(FVPRC), optional, intent(inout) :: wbufferx(:,:),ebufferx(:,:),sbufferx(:,:),nbufferx(:,:)
+  real(R_GRID), optional, intent(inout) :: wbuffery(:),ebuffery(:),sbuffery(:),nbuffery(:)
+  real(R_GRID), optional, intent(inout) :: wbufferx(:),ebufferx(:),sbufferx(:),nbufferx(:)
   integer, optional, intent(in) :: gridtype
+  integer, optional, intent(in) :: flags
+ endsubroutine mpp_get_boundary_2d
 
-  field1 = 2*field1
-  field2 = 2*field2
 
-  wbuffery(:,:) = field1(1,:,:)
-  ebuffery(:,:) = field1(2,:,:)
-  sbufferx(:,:) = field2(1,:,:)
-  nbufferx(:,:) = field2(2,:,:)
-  
- endsubroutine mpp_get_boundary
+ subroutine mpp_get_boundary_3d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
+  real(R_GRID), intent(inout) :: field1(:,:,:),field2(:,:,:)
+  type(domain2d), intent(in) :: domain
+  real(R_GRID), optional, intent(inout) :: wbuffery(:,:),ebuffery(:,:),sbuffery(:,:),nbuffery(:,:)
+  real(R_GRID), optional, intent(inout) :: wbufferx(:,:),ebufferx(:,:),sbufferx(:,:),nbufferx(:,:)
+  integer, optional, intent(in) :: gridtype
+  integer, optional, intent(in) :: flags
+ endsubroutine mpp_get_boundary_3d
 
 
 
@@ -775,43 +1084,25 @@ end function mpp_get_ntile_count
 ! mpp_get_C2F_index
 ! -----------------
 
- subroutine mpp_get_C2F_index(nestdomain, is_f, ie_f, js_f, je_f, is_c, ie_c, js_c, je_c, SIDE, position)
-
-  type(nest_domain_type), intent(inout) :: nestdomain
-  integer, intent(out) :: is_f, ie_f, js_f, je_f, is_c, ie_c, js_c, je_c
-  integer, intent(in) :: SIDE, position
-
-   is_f = 1
-   ie_f = 20
-   js_f = 1
-   je_f = 20
-   is_c = 1
-   ie_c = 20
-   js_c = 1
-   je_c = 20
-
- endsubroutine mpp_get_C2F_index
-
-
+ subroutine mpp_get_C2F_index(nest_domain, is_fine, ie_fine, js_fine, je_fine, &
+  is_coarse, ie_coarse, js_coarse, je_coarse, dir, nest_level, position)
+type(nest_domain_type), intent(in ) :: nest_domain 
+integer,                intent(out) :: is_fine, ie_fine, js_fine, je_fine
+integer,                intent(out) :: is_coarse, ie_coarse, js_coarse, je_coarse 
+integer,                intent(in ) :: dir, nest_level 
+integer, optional,      intent(in ) :: position 
+end subroutine mpp_get_C2F_index
 
 ! mpp_get_F2C_index
-! -----------------
+! ---------------
 
- subroutine mpp_get_F2C_index(nestdomain, is_c, ie_c, js_c, je_c, is_f, ie_f, js_f, je_f, position)
-
-  type(nest_domain_type), intent(inout) :: nestdomain
-  integer, intent(out) :: is_c, ie_c, js_c, je_c, is_f, ie_f, js_f, je_f
-  integer, intent(in) :: position
-
-   is_f = 1
-   ie_f = 20
-   js_f = 1
-   je_f = 20
-   is_c = 1
-   ie_c = 20
-   js_c = 1
-   je_c = 20
-
+subroutine mpp_get_F2C_index(nest_domain, is_coarse, ie_coarse, js_coarse, je_coarse, &
+  is_fine, ie_fine, js_fine, je_fine, nest_level, position)
+type(nest_domain_type), intent(in ) :: nest_domain
+integer,                intent(out) :: is_fine, ie_fine, js_fine, je_fine
+integer,                intent(out) :: is_coarse, ie_coarse, js_coarse, je_coarse 
+integer,                intent(in)  :: nest_level
+integer, optional,      intent(in ) :: position
  endsubroutine mpp_get_F2C_index
 
 
@@ -819,60 +1110,283 @@ end function mpp_get_ntile_count
 ! mpp_update_nest_fine
 ! --------------------
 
- subroutine mpp_update_nest_fine_2d(field, nestdomain, wbuffer, sbuffer, ebuffer, nbuffer,  position)
+ subroutine mpp_update_nest_fine_r4_2d(field, nest_domain, wbuffer, ebuffer, sbuffer, nbuffer, &
+  nest_level, flags, complete, position, extra_halo, name, tile_count)
+real(kind=4),             intent(in)      :: field(:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain
+real(kind=4),             intent(inout)   :: wbuffer(:,:) 
+real(kind=4),             intent(inout)   :: ebuffer(:,:) 
+real(kind=4),             intent(inout)   :: sbuffer(:,:) 
+real(kind=4),             intent(inout)   :: nbuffer(:,:) 
+integer,          intent(in)           :: nest_level
+integer,          intent(in), optional :: flags 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_fine_r4_2d
 
-  real(FVPRC), intent(in) :: field(:,:)
-  type(nest_domain_type), intent(inout) :: nestdomain
-  real(FVPRC), intent(inout) :: wbuffer(:,:), sbuffer(:,:), ebuffer(:,:), nbuffer(:,:)
-  integer, intent(in), optional :: position
+subroutine mpp_update_nest_fine_r4_3d(field, nest_domain, wbuffer, sbuffer, ebuffer, nbuffer, &
+  nest_level, flags, complete, position, extra_halo, name, tile_count)
+real(kind=4),             intent(in)      :: field(:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=4),             intent(inout)   :: wbuffer(:,:,:) 
+real(kind=4),             intent(inout)   :: ebuffer(:,:,:) 
+real(kind=4),             intent(inout)   :: sbuffer(:,:,:) 
+real(kind=4),             intent(inout)   :: nbuffer(:,:,:) 
+integer,          intent(in)           :: nest_level 
+integer,          intent(in), optional :: flags
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_fine_r4_3d
 
-  wbuffer = 2*field
-  ebuffer = 2*field
-  sbuffer = 2*field
-  nbuffer = 2*field
+subroutine mpp_update_nest_fine_r4_4d(field, nest_domain, wbuffer, ebuffer, sbuffer, nbuffer, &
+  nest_level, flags, complete, position, extra_halo, name, tile_count)
+real(kind=4),             intent(in)      :: field(:,:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=4),             intent(inout)   :: wbuffer(:,:,:,:) 
+real(kind=4),             intent(inout)   :: ebuffer(:,:,:,:) 
+real(kind=4),             intent(inout)   :: sbuffer(:,:,:,:) 
+real(kind=4),             intent(inout)   :: nbuffer(:,:,:,:) 
+integer,          intent(in)           :: nest_level 
+integer,          intent(in), optional :: flags  
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_fine_r4_4d
 
- endsubroutine mpp_update_nest_fine_2d
- subroutine mpp_update_nest_fine_3d(field, nestdomain, wbuffer, sbuffer, ebuffer, nbuffer,  position)
+subroutine mpp_update_nest_fine_r4_2d_v(fieldx, fieldy, nest_domain, wbufferx, wbuffery, sbufferx, sbuffery, &
+  ebufferx, ebuffery, nbufferx, nbuffery, nest_level, &
+  flags, gridtype, complete, extra_halo, name, tile_count)
+real(kind=4),             intent(in)      :: fieldx(:,:), fieldy(:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=4),             intent(inout)   :: wbufferx(:,:), wbuffery(:,:) 
+real(kind=4),             intent(inout)   :: ebufferx(:,:), ebuffery(:,:) 
+real(kind=4),             intent(inout)   :: sbufferx(:,:), sbuffery(:,:) 
+real(kind=4),             intent(inout)   :: nbufferx(:,:), nbuffery(:,:) 
+integer,          intent(in)           :: nest_level
+integer,          intent(in), optional :: flags
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: gridtype
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_fine_r4_2d_v
 
-  real(FVPRC), intent(in) :: field(:,:,:)
-  type(nest_domain_type), intent(inout) :: nestdomain
-  real(FVPRC), intent(inout) :: wbuffer(:,:,:), sbuffer(:,:,:), ebuffer(:,:,:), nbuffer(:,:,:)
-  integer, intent(in), optional :: position
+subroutine mpp_update_nest_fine_r4_3d_v(fieldx, fieldy, nest_domain, wbufferx, wbuffery, sbufferx, sbuffery, &
+  ebufferx, ebuffery, nbufferx, nbuffery, nest_level, &
+  flags, gridtype, complete, extra_halo, name, tile_count)
+real(kind=4),             intent(in)      :: fieldx(:,:,:), fieldy(:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain
+real(kind=4),             intent(inout)   :: wbufferx(:,:,:), wbuffery(:,:,:) 
+real(kind=4),             intent(inout)   :: ebufferx(:,:,:), ebuffery(:,:,:) 
+real(kind=4),             intent(inout)   :: sbufferx(:,:,:), sbuffery(:,:,:) 
+real(kind=4),             intent(inout)   :: nbufferx(:,:,:), nbuffery(:,:,:) 
+integer,          intent(in)           :: nest_level 
+integer,          intent(in), optional :: flags 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: gridtype
+integer,          intent(in), optional :: extra_halo
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_fine_r4_3d_v
 
-  wbuffer = 2*field
-  ebuffer = 2*field
-  sbuffer = 2*field
-  nbuffer = 2*field
+subroutine mpp_update_nest_fine_r8_2d(field, nest_domain, wbuffer, ebuffer, sbuffer, nbuffer, &
+  nest_level, flags, complete, position, extra_halo, name, tile_count)
+real(kind=8),             intent(in)      :: field(:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain
+real(kind=8),             intent(inout)   :: wbuffer(:,:) 
+real(kind=8),             intent(inout)   :: ebuffer(:,:) 
+real(kind=8),             intent(inout)   :: sbuffer(:,:) 
+real(kind=8),             intent(inout)   :: nbuffer(:,:) 
+integer,          intent(in)           :: nest_level
+integer,          intent(in), optional :: flags 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_fine_r8_2d
 
- endsubroutine mpp_update_nest_fine_3d
- subroutine mpp_update_nest_fine_4d(field, nestdomain, wbuffer, sbuffer, ebuffer, nbuffer,  position)
+subroutine mpp_update_nest_fine_r8_3d(field, nest_domain, wbuffer, sbuffer, ebuffer, nbuffer, &
+  nest_level, flags, complete, position, extra_halo, name, tile_count)
+real(kind=8),             intent(in)      :: field(:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=8),             intent(inout)   :: wbuffer(:,:,:) 
+real(kind=8),             intent(inout)   :: ebuffer(:,:,:) 
+real(kind=8),             intent(inout)   :: sbuffer(:,:,:) 
+real(kind=8),             intent(inout)   :: nbuffer(:,:,:) 
+integer,          intent(in)           :: nest_level 
+integer,          intent(in), optional :: flags
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_fine_r8_3d
 
-  real(FVPRC), intent(in) :: field(:,:,:,:)
-  type(nest_domain_type), intent(inout) :: nestdomain
-  real(FVPRC), intent(inout) :: wbuffer(:,:,:,:), sbuffer(:,:,:,:), ebuffer(:,:,:,:), nbuffer(:,:,:,:)
-  integer, intent(in), optional :: position
+subroutine mpp_update_nest_fine_r8_4d(field, nest_domain, wbuffer, ebuffer, sbuffer, nbuffer, &
+  nest_level, flags, complete, position, extra_halo, name, tile_count)
+real(kind=8),             intent(in)      :: field(:,:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=8),             intent(inout)   :: wbuffer(:,:,:,:) 
+real(kind=8),             intent(inout)   :: ebuffer(:,:,:,:) 
+real(kind=8),             intent(inout)   :: sbuffer(:,:,:,:) 
+real(kind=8),             intent(inout)   :: nbuffer(:,:,:,:) 
+integer,          intent(in)           :: nest_level 
+integer,          intent(in), optional :: flags  
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_fine_r8_4d
 
-  wbuffer = 2*field
-  ebuffer = 2*field
-  sbuffer = 2*field
-  nbuffer = 2*field
+subroutine mpp_update_nest_fine_r8_2d_v(fieldx, fieldy, nest_domain, wbufferx, wbuffery, sbufferx, sbuffery, &
+  ebufferx, ebuffery, nbufferx, nbuffery, nest_level, &
+  flags, gridtype, complete, extra_halo, name, tile_count)
+real(kind=8),             intent(in)      :: fieldx(:,:), fieldy(:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=8),             intent(inout)   :: wbufferx(:,:), wbuffery(:,:) 
+real(kind=8),             intent(inout)   :: ebufferx(:,:), ebuffery(:,:) 
+real(kind=8),             intent(inout)   :: sbufferx(:,:), sbuffery(:,:) 
+real(kind=8),             intent(inout)   :: nbufferx(:,:), nbuffery(:,:) 
+integer,          intent(in)           :: nest_level
+integer,          intent(in), optional :: flags
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: gridtype
+integer,          intent(in), optional :: extra_halo 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_fine_r8_2d_v
 
- endsubroutine mpp_update_nest_fine_4d
+subroutine mpp_update_nest_fine_r8_3d_v(fieldx, fieldy, nest_domain, wbufferx, wbuffery, sbufferx, sbuffery, &
+  ebufferx, ebuffery, nbufferx, nbuffery, nest_level, &
+  flags, gridtype, complete, extra_halo, name, tile_count)
+real(kind=8),             intent(in)      :: fieldx(:,:,:), fieldy(:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain
+real(kind=8),             intent(inout)   :: wbufferx(:,:,:), wbuffery(:,:,:) 
+real(kind=8),             intent(inout)   :: ebufferx(:,:,:), ebuffery(:,:,:) 
+real(kind=8),             intent(inout)   :: sbufferx(:,:,:), sbuffery(:,:,:) 
+real(kind=8),             intent(inout)   :: nbufferx(:,:,:), nbuffery(:,:,:) 
+integer,          intent(in)           :: nest_level 
+integer,          intent(in), optional :: flags 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: gridtype
+integer,          intent(in), optional :: extra_halo
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_fine_r8_3d_v
 
 
 ! mpp_update_nest_coarse
 ! ----------------------
 
- subroutine mpp_update_nest_coarse(field, nestdomain, nestdat, position)
+subroutine mpp_update_nest_coarse_r4_2d(field_in, nest_domain, field_out, nest_level, complete, position, name, &
+  &  tile_count)
+real(kind=4),             intent(in)      :: field_in(:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=4),             intent(inout)   :: field_out(:,:) 
+integer,          intent(in)           :: nest_level 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_coarse_r4_2d
 
-  real(FVPRC), intent(inout) :: field(:,:,:)
-  type(nest_domain_type), intent(inout) :: nestdomain
-  real(FVPRC), intent(in) :: nestdat(:,:,:)
-  integer, intent(in) :: position
+subroutine mpp_update_nest_coarse_r4_3d(field_in, nest_domain, field_out, nest_level, complete, position, name, &
+  &  tile_count)
+real(kind=4),             intent(in)      :: field_in(:,:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=4),             intent(inout)   :: field_out(:,:,:) 
+integer,          intent(in)           :: nest_level
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_coarse_r4_3d
 
-   field = 2*field
+subroutine mpp_update_nest_coarse_r4_4d(field_in, nest_domain, field_out, nest_level, complete, position, name, &
+  &  tile_count)
+real(kind=4),             intent(in)      :: field_in(:,:,:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain
+real(kind=4),             intent(inout)   :: field_out(:,:,:,:) 
+integer,          intent(in)           :: nest_level 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_coarse_r4_4d
 
- endsubroutine mpp_update_nest_coarse
+subroutine mpp_update_nest_coarse_r4_3d_v(fieldx_in, fieldy_in, nest_domain, fieldx_out, fieldy_out, nest_level, &
+  flags, gridtype, complete, name, tile_count)
+real(kind=4),             intent(in)      :: fieldx_in(:,:,:) 
+real(kind=4),             intent(in)      :: fieldy_in(:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+integer,          intent(in), optional :: flags, gridtype 
+real(kind=4),             intent(inout)   :: fieldx_out(:,:,:) 
+real(kind=4),             intent(inout)   :: fieldy_out(:,:,:) 
+integer,          intent(in)           :: nest_level 
+logical,          intent(in), optional :: complete
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_coarse_r4_3d_v
+
+subroutine mpp_update_nest_coarse_r8_2d(field_in, nest_domain, field_out, nest_level, complete, position, name, &
+  &  tile_count)
+real(kind=8),             intent(in)      :: field_in(:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=8),             intent(inout)   :: field_out(:,:) 
+integer,          intent(in)           :: nest_level 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_coarse_r8_2d
+
+subroutine mpp_update_nest_coarse_r8_3d(field_in, nest_domain, field_out, nest_level, complete, position, name, &
+  &  tile_count)
+real(kind=8),             intent(in)      :: field_in(:,:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain 
+real(kind=8),             intent(inout)   :: field_out(:,:,:) 
+integer,          intent(in)           :: nest_level
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_coarse_r8_3d
+
+subroutine mpp_update_nest_coarse_r8_4d(field_in, nest_domain, field_out, nest_level, complete, position, name, &
+  &  tile_count)
+real(kind=8),             intent(in)      :: field_in(:,:,:,:)
+type(nest_domain_type), intent(inout)  :: nest_domain
+real(kind=8),             intent(inout)   :: field_out(:,:,:,:) 
+integer,          intent(in)           :: nest_level 
+logical,          intent(in), optional :: complete 
+integer,          intent(in), optional :: position 
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count 
+end subroutine mpp_update_nest_coarse_r8_4d
+
+subroutine mpp_update_nest_coarse_r8_3d_v(fieldx_in, fieldy_in, nest_domain, fieldx_out, fieldy_out, nest_level, &
+  flags, gridtype, complete, name, tile_count)
+real(kind=8),             intent(in)      :: fieldx_in(:,:,:) 
+real(kind=8),             intent(in)      :: fieldy_in(:,:,:) 
+type(nest_domain_type), intent(inout)  :: nest_domain 
+integer,          intent(in), optional :: flags, gridtype 
+real(kind=8),             intent(inout)   :: fieldx_out(:,:,:) 
+real(kind=8),             intent(inout)   :: fieldy_out(:,:,:) 
+integer,          intent(in)           :: nest_level 
+logical,          intent(in), optional :: complete
+character(len=*), intent(in), optional :: name 
+integer,          intent(in), optional :: tile_count
+end subroutine mpp_update_nest_coarse_r8_3d_v
 
 
 ! mpp_global_sum

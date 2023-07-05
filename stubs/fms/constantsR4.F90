@@ -1,11 +1,8 @@
-module constants_mod
+module constantsR4_mod
+    implicit none
+    private
 
-implicit none
-private
-
-real(kind=8), public, parameter :: PI_8 = 3.14159265358979323846
-
-integer, parameter :: FVPRC = 8
+integer, parameter :: FVPRC = 4
 
 real(FVPRC), public, parameter :: small_fac = 1.
 real(FVPRC) :: realnumber
@@ -55,16 +52,6 @@ real(FVPRC), public, parameter :: C2DBARS = 1.e-4
 real(FVPRC), public, parameter :: KELVIN  = 273.15
 real(FVPRC), public, parameter :: EPSLN   = 1.0e-30
 
-public :: constants_init
-
 contains
-
-subroutine constants_init
-
-! dummy routine.
-
-end subroutine constants_init
-
-end module constants_mod
-
-
+    
+end module constantsR4_mod
