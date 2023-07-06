@@ -3,7 +3,9 @@ module time_manager_mod
 implicit none
 private
 
-public time_type, get_time, month_name, get_date
+public time_type, get_time, month_name, get_date, time_type_to_real
+
+public operator(+), operator(-), operator(/), assignment(=)
 
 type time_type
    private
@@ -13,7 +15,36 @@ type time_type
    integer:: dummy ! added as a workaround bug on IRIX64 (AP)
 end type time_type
 
+interface operator (+);   module procedure time_plus;        end interface
+interface operator (-);   module procedure time_minus;       end interface
+interface operator (/);   module procedure time_divide;      end interface
+interface assignment (=);   module procedure time_assignment;      end interface
+
 contains
+
+function time_plus(time1, time2)
+   type(time_type) :: time_plus
+   type(time_type), intent(in) :: time1, time2   
+end function time_plus
+
+function time_minus(time1, time2)
+   type(time_type) :: time_minus
+   type(time_type), intent(in) :: time1, time2   
+end function time_minus
+
+function time_divide(time1, time2)
+   integer :: time_divide
+   type(time_type), intent(in) :: time1, time2   
+end function time_divide
+
+subroutine time_assignment(time1, time2)
+   type(time_type), intent(out) :: time1
+   type(time_type), intent(in)  :: time2
+end subroutine time_assignment
+
+real function time_type_to_real(time)
+   type(time_type), intent(in) :: time
+end function time_type_to_real
 
 function month_name(mn)
    integer, intent(in) :: mn

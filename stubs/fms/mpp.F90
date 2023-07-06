@@ -4,7 +4,7 @@ module mpp_mod
 
 use platform_mod, only: r8_kind, i8_kind
 use mpp_parameter_mod, only: MPP_DEBUG, NOTE, MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, FATAL, WARNING, &
-                             EVENT_RECV, CLOCK_ROUTINE
+                             EVENT_RECV, CLOCK_ROUTINE, NULL_PE
 
 implicit none
 private
@@ -14,7 +14,7 @@ public mpp_error, FATAL, mpp_sum, mpp_sync, mpp_npes, mpp_broadcast, WARNING, mp
        mpp_clock_end, mpp_clock_id, lowercase, stdlog, MPP_DEBUG, NOTE, &
        MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, mpp_set_warn_level, mpp_declare_pelist, &
        mpp_set_current_pelist, mpp_chksum, stdout, stderr, EVENT_RECV, mpp_gather, &
-       mpp_get_current_pelist, get_unit, CLOCK_ROUTINE, mpp_min
+       mpp_get_current_pelist, get_unit, CLOCK_ROUTINE, mpp_min, NULL_PE
 
 integer, parameter :: NAME_LENGTH = 64
 integer, parameter, public :: CLOCK_SUBCOMPONENT=11
@@ -35,6 +35,8 @@ interface mpp_gather
     module procedure mpp_gather_r8_1dv
     module procedure mpp_gather_pelist_r4_2d
     module procedure mpp_gather_pelist_r8_2d
+    module procedure mpp_gather_pelist_r4_3d
+    module procedure mpp_gather_pelist_r8_3d
 end interface
 
 interface mpp_broadcast
@@ -384,6 +386,26 @@ real(kind=8), dimension(:,:),         intent(inout) :: data
 logical,                           intent(in)    :: is_root_pe
 integer,   optional,               intent(in)    :: ishift, jshift
  end subroutine mpp_gather_pelist_r8_2d
+
+ subroutine mpp_gather_pelist_r4_3d(is, ie, js, je, nz, pelist, array_seg, data, is_root_pe, &
+  ishift, jshift)
+integer,                           intent(in)    :: is, ie, js, je, nz
+integer,   dimension(:),           intent(in)    :: pelist
+real(kind=4), dimension(:,:,:), intent(in)    :: array_seg
+real(kind=4), dimension(:,:,:),         intent(inout) :: data
+logical,                           intent(in)    :: is_root_pe
+integer,   optional,               intent(in)    :: ishift, jshift
+ end subroutine mpp_gather_pelist_r4_3d
+
+ subroutine mpp_gather_pelist_r8_3d(is, ie, js, je, nz, pelist, array_seg, data, is_root_pe, &
+  ishift, jshift)
+integer,                           intent(in)    :: is, ie, js, je, nz
+integer,   dimension(:),           intent(in)    :: pelist
+real(kind=8), dimension(:,:,:), intent(in)    :: array_seg
+real(kind=8), dimension(:,:,:),         intent(inout) :: data
+logical,                           intent(in)    :: is_root_pe
+integer,   optional,               intent(in)    :: ishift, jshift
+ end subroutine mpp_gather_pelist_r8_3d
 
  subroutine mpp_sync
   print*, 'mpp_sync'

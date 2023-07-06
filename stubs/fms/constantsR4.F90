@@ -2,6 +2,8 @@ module constantsR4_mod
     implicit none
     private
 
+real(kind=8), public, parameter :: PI_8 = 3.14159265358979323846
+
 integer, parameter :: FVPRC = 4
 
 real(FVPRC), public, parameter :: small_fac = 1.

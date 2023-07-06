@@ -31,7 +31,8 @@ public DGRID_NE, CGRID_NE, &
        mpp_complete_group_update, domaincommunicator2D, mpp_define_mosaic, &
        mpp_group_update_initialized, mpp_create_group_update, mpp_reset_group_update_field, &
        mpp_get_io_domain_layout, mpp_get_layout, mpp_copy_domain, mpp_do_group_update, &
-       mpp_get_domain_shift, AGRID, BITWISE_EFP_SUM, mpp_get_tile_id, mpp_get_compute_domains
+       mpp_get_domain_shift, AGRID, BITWISE_EFP_SUM, mpp_get_tile_id, &
+       mpp_get_compute_domains, mpp_get_domain_components, mpp_domains_set_stack_size
 
 
   !!!!!!!!!FV_ARRAYS!!!!!!!!!!!!
@@ -43,6 +44,8 @@ public DGRID_NE, CGRID_NE, &
   integer :: mpp_check_field ! dummy
   integer :: mpp_domains_exit ! dummy
   integer :: mpp_get_domain_shift ! dummy
+  integer :: mpp_get_domain_components ! dummy
+  integer :: mpp_domains_set_stack_size ! dummy
   integer :: CENTER, CORNER, NORTH, EAST, SOUTH, WEST
   integer, parameter :: BITWISE_EXACT_SUM = 1
 
@@ -484,8 +487,10 @@ module procedure mpp_reset_group_update_field_r8_3dv
 end interface mpp_reset_group_update_field
 
 interface mpp_get_boundary
-module procedure mpp_get_boundary_2d
-module procedure mpp_get_boundary_3d
+module procedure mpp_get_boundary_r4_2d
+module procedure mpp_get_boundary_r4_3d
+module procedure mpp_get_boundary_r8_2d
+module procedure mpp_get_boundary_r8_3d
 end interface
 
  contains
@@ -518,7 +523,7 @@ end subroutine mpp_get_compute_domains
  end subroutine mpp_copy_domain
 
  subroutine mpp_get_layout(domain, layout)
-  type(domain2D),       intent(inout)        :: domain
+  type(domain2D),       intent(in)        :: domain
   integer, intent(inout) :: layout(2)
  end subroutine mpp_get_layout
 
@@ -768,8 +773,9 @@ end subroutine
  end subroutine mpp_define_mosaic_pelist
 
  subroutine mpp_get_neighbor_pe(d, dir, pe)
-  type(domain2d), pointer :: d
-  integer, intent(in) :: dir, pe
+  type(domain2d), intent(in) :: d
+  integer, intent(in) :: dir
+  integer, intent(out) :: pe
  end subroutine mpp_get_neighbor_pe
 
  subroutine mpp_define_layout(a,b,layout)
@@ -992,24 +998,42 @@ end function mpp_get_ntile_count
 ! mpp_get_boundary
 ! ----------------
 
- subroutine mpp_get_boundary_2d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
-  real(R_GRID), intent(inout) :: field1(:,:),field2(:,:)
+ subroutine mpp_get_boundary_r4_2d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
+  real(kind=4), intent(inout) :: field1(:,:),field2(:,:)
   type(domain2d), intent(in) :: domain
-  real(R_GRID), optional, intent(inout) :: wbuffery(:),ebuffery(:),sbuffery(:),nbuffery(:)
-  real(R_GRID), optional, intent(inout) :: wbufferx(:),ebufferx(:),sbufferx(:),nbufferx(:)
+  real(kind=4), optional, intent(inout) :: wbuffery(:),ebuffery(:),sbuffery(:),nbuffery(:)
+  real(kind=4), optional, intent(inout) :: wbufferx(:),ebufferx(:),sbufferx(:),nbufferx(:)
   integer, optional, intent(in) :: gridtype
   integer, optional, intent(in) :: flags
- endsubroutine mpp_get_boundary_2d
+ endsubroutine mpp_get_boundary_r4_2d
 
-
- subroutine mpp_get_boundary_3d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
-  real(R_GRID), intent(inout) :: field1(:,:,:),field2(:,:,:)
+ subroutine mpp_get_boundary_r8_2d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
+  real(kind=8), intent(inout) :: field1(:,:),field2(:,:)
   type(domain2d), intent(in) :: domain
-  real(R_GRID), optional, intent(inout) :: wbuffery(:,:),ebuffery(:,:),sbuffery(:,:),nbuffery(:,:)
-  real(R_GRID), optional, intent(inout) :: wbufferx(:,:),ebufferx(:,:),sbufferx(:,:),nbufferx(:,:)
+  real(kind=8), optional, intent(inout) :: wbuffery(:),ebuffery(:),sbuffery(:),nbuffery(:)
+  real(kind=8), optional, intent(inout) :: wbufferx(:),ebufferx(:),sbufferx(:),nbufferx(:)
   integer, optional, intent(in) :: gridtype
   integer, optional, intent(in) :: flags
- endsubroutine mpp_get_boundary_3d
+ endsubroutine mpp_get_boundary_r8_2d
+
+
+ subroutine mpp_get_boundary_r4_3d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
+  real(kind=4), intent(inout) :: field1(:,:,:),field2(:,:,:)
+  type(domain2d), intent(in) :: domain
+  real(kind=4), optional, intent(inout) :: wbuffery(:,:),ebuffery(:,:),sbuffery(:,:),nbuffery(:,:)
+  real(kind=4), optional, intent(inout) :: wbufferx(:,:),ebufferx(:,:),sbufferx(:,:),nbufferx(:,:)
+  integer, optional, intent(in) :: gridtype
+  integer, optional, intent(in) :: flags
+ endsubroutine mpp_get_boundary_r4_3d
+
+ subroutine mpp_get_boundary_r8_3d(field1,field2,domain,wbuffery,ebuffery,sbuffery,nbuffery,wbufferx,ebufferx,sbufferx,nbufferx,gridtype,flags)
+  real(kind=8), intent(inout) :: field1(:,:,:),field2(:,:,:)
+  type(domain2d), intent(in) :: domain
+  real(kind=8), optional, intent(inout) :: wbuffery(:,:),ebuffery(:,:),sbuffery(:,:),nbuffery(:,:)
+  real(kind=8), optional, intent(inout) :: wbufferx(:,:),ebufferx(:,:),sbufferx(:,:),nbufferx(:,:)
+  integer, optional, intent(in) :: gridtype
+  integer, optional, intent(in) :: flags
+ endsubroutine mpp_get_boundary_r8_3d
 
 
 

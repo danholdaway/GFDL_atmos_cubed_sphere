@@ -8,6 +8,8 @@ module fms2_io_mod
 
     public :: read_data
 
+    integer :: unlimited
+
 type, private :: bc_information
   integer, dimension(:), allocatable :: indices !< Indices for the halo region for the variable
                                                 !! (starting x, ending x, starting y, ending y)
@@ -113,6 +115,7 @@ endtype FmsNetcdfDomainFile_t
 interface read_data
   module procedure read_data_netcdfdomain_1d
   module procedure read_data_netcdfdomain_2d
+  module procedure read_data_netcdfdomain_3d
   module procedure read_data_netcdf_char
   module procedure read_data_netcdf_1d
   module procedure read_data_netcdf_2d
@@ -121,14 +124,281 @@ end interface
 interface open_file
    module procedure open_file_netcfd
    module procedure open_file_string
+   module procedure open_file_netcfddomain
 end interface
 
 interface close_file
    module procedure close_file_netcfd
    module procedure close_file_int
+   module procedure close_file_netcfddomain
 end interface 
+
+interface register_restart_field
+    module procedure register_restart_field_netcfd_2d
+    module procedure register_restart_field_netcfd_3d_other
+    module procedure register_restart_field_netcfd_4d_other
+    module procedure register_restart_field_netcfddomain_3d
+    module procedure register_restart_field_netcfddomain_4d
+    module procedure register_restart_field_netcfddomain_4d_other
+end interface
+
+interface register_axis 
+    module procedure register_axis_netcfd
+    module procedure register_axis_netcfddomain_1
+    module procedure register_axis_netcfddomain_2
+end interface
+
+interface read_restart 
+    module procedure read_restart_netcfd
+    module procedure read_restart_netcfddomain
+end interface
+
+interface write_restart 
+    module procedure write_restart_netcfd
+    module procedure write_restart_netcfddomain
+end interface
+
+interface register_field
+    module procedure register_field_netcdf
+    module procedure register_field_netcfddomain_1d
+    module procedure register_field_netcfddomain_3d
+end interface
+
+interface write_data
+    module procedure write_data_netcfd_i_0d
+    module procedure write_data_netcfd_i_1d
+    module procedure write_data_netcfddomain_i_0d
+    module procedure write_data_netcfddomain_i_1d
+    module procedure write_data_netcfddomain_r_1d
+    module procedure write_data_netcfddomain_r_2d
+    module procedure write_data_netcfddomain_r_3d
+end interface
+
+interface register_variable_attribute
+    module procedure register_variable_attribute_netcdf
+    module procedure register_variable_attribute_netcfddomain
+end interface
+
+interface register_global_attribute
+      module procedure register_global_attribute_i
+      module procedure register_global_attribute_str
+      module procedure register_global_attribute_r
+end interface
     
 contains
+
+subroutine get_dimension_size(file, name, val)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  integer, intent(out) :: val
+end subroutine get_dimension_size
+
+logical function global_att_exists(file, name)
+type(FmsNetcdfFile_t), intent(inout) :: file
+character(len=*), intent(in) :: name
+end function global_att_exists
+
+subroutine register_global_attribute_i(file, name, val)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  integer, intent(in) :: val
+end subroutine register_global_attribute_i
+
+subroutine register_global_attribute_r(file, name, val)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  real, intent(in) :: val
+end subroutine register_global_attribute_r
+
+subroutine register_global_attribute_str(file, name, val)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name, val
+end subroutine register_global_attribute_str
+
+subroutine register_variable_attribute_netcdf(file, str1, str2, str3, str_len)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: str1, str2, str3
+  integer, optional, intent(in) :: str_len
+end subroutine register_variable_attribute_netcdf
+
+subroutine register_variable_attribute_netcfddomain(file, str1, str2, str3, str_len)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: str1, str2, str3
+  integer, optional, intent(in) :: str_len
+end subroutine register_variable_attribute_netcfddomain
+
+subroutine get_global_io_domain_indices(file, axisname, is, ie, buffer)
+  type(FmsNetcdfDomainFile_t), intent(inout) ::  file
+  integer, intent(in) :: ie, is
+  integer, allocatable, intent(inout) :: buffer(:)
+  character(len=7) :: axisname
+end subroutine get_global_io_domain_indices
+
+subroutine write_data_netcfd_i_0d(file, name, buffer)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  integer, intent(in) :: buffer
+end subroutine write_data_netcfd_i_0d
+
+subroutine write_data_netcfd_i_1d(file, name, buffer)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  integer, intent(in) :: buffer(:)
+end subroutine write_data_netcfd_i_1d
+
+subroutine write_data_netcfddomain_i_0d(file, name, buffer)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  integer, intent(in) :: buffer
+end subroutine write_data_netcfddomain_i_0d
+
+subroutine write_data_netcfddomain_i_1d(file, name, buffer)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  integer, intent(in) :: buffer(:)
+end subroutine write_data_netcfddomain_i_1d
+
+subroutine write_data_netcfddomain_r_1d(file, name, buffer)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  real, intent(in) :: buffer(:)
+end subroutine write_data_netcfddomain_r_1d
+
+subroutine write_data_netcfddomain_r_2d(file, name, buffer)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  real, intent(in) :: buffer(:,:)
+end subroutine write_data_netcfddomain_r_2d
+
+subroutine write_data_netcfddomain_r_3d(file, name, buffer)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: name
+  real, intent(in) :: buffer(:,:,:)
+end subroutine write_data_netcfddomain_r_3d
+
+subroutine register_field_netcdf(file, name, field_type, dim_names)
+  type(FmsNetcdfFile_t), intent(in) :: file
+  character(len=*), intent(in) :: name, field_type
+  character(len=*), intent(in)  :: dim_names(:)
+end subroutine register_field_netcdf
+
+subroutine register_field_netcfddomain_1d(file, name, field_type, dim_names)
+  type(FmsNetcdfDomainFile_t), intent(in) :: file
+  character(len=*), intent(in) :: name, field_type
+  character(len=*), intent(in)  :: dim_names(:)
+end subroutine register_field_netcfddomain_1d
+
+subroutine register_field_netcfddomain_3d(file, name, field_type, dim_names)
+  type(FmsNetcdfDomainFile_t), intent(in) :: file
+  character(len=*), intent(in) :: name, field_type
+  character(len=*), intent(in)  :: dim_names(:,:,:)
+end subroutine register_field_netcfddomain_3d
+
+subroutine write_restart_bc(file)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+end subroutine write_restart_bc
+
+subroutine write_restart_netcfd(file)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+end subroutine write_restart_netcfd
+
+subroutine write_restart_netcfddomain(file)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+end subroutine write_restart_netcfddomain
+
+subroutine read_restart_bc(file, ignore_checksum)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+  logical, optional, intent(in) :: ignore_checksum
+end subroutine read_restart_bc
+
+subroutine read_restart_netcfd(file, ignore_checksum)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+  logical, optional, intent(in) :: ignore_checksum
+end subroutine read_restart_netcfd
+
+subroutine read_restart_netcfddomain(file, ignore_checksum)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  logical, optional, intent(in) :: ignore_checksum
+end subroutine read_restart_netcfddomain
+
+subroutine register_axis_netcfd(file, str1, int, domain_position)
+  type(FmsNetcdfFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: str1
+  integer, intent(in) :: int
+  integer, optional, intent(in) :: domain_position
+end subroutine register_axis_netcfd
+
+subroutine register_axis_netcfddomain_1(file, str1, domain_position)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: str1
+  integer, optional, intent(in) :: domain_position
+end subroutine register_axis_netcfddomain_1
+
+subroutine register_axis_netcfddomain_2(file, str1, str2, domain_position)
+  type(FmsNetcdfDomainFile_t), intent(inout) :: file
+  character(len=*), intent(in) :: str1
+  character(len=*), intent(in) :: str2
+  integer, optional, intent(in) :: domain_position
+end subroutine register_axis_netcfddomain_2
+
+subroutine register_restart_field_netcfd_2d(file, str, ak, dim_names)
+    type(FmsNetcdfFile_t), intent(in) :: file
+    character(len=*), intent(in) :: str
+    real, intent(in) :: ak(:)
+    character(len=8), dimension(2), intent(in)  :: dim_names
+end subroutine register_restart_field_netcfd_2d
+
+subroutine register_restart_field_netcfd_3d_other(file, str, ak, indices, global_size, pelist, is_root_pe, jshift, x_halo, y_halo, ishift, is_optional)
+  type(FmsNetcdfFile_t), intent(in) :: file
+  character(len=*), intent(in) :: str
+  real, dimension(:,:), intent(in) :: ak
+  integer, intent(in) :: indices(:), global_size(:), pelist(:)
+  logical, intent(in) :: is_root_pe
+  integer, optional, intent(in) :: jshift, x_halo, y_halo, ishift
+  logical, optional, intent(in) :: is_optional
+end subroutine register_restart_field_netcfd_3d_other
+
+subroutine register_restart_field_netcfd_4d_other(file, str, ak, indices, global_size, pelist, is_root_pe, jshift, x_halo, y_halo, ishift, is_optional)
+  type(FmsNetcdfFile_t), intent(in) :: file
+  character(len=*), intent(in) :: str
+  real, intent(in) :: ak(:,:,:)
+  integer, intent(in) :: indices(:), global_size(:), pelist(:)
+  logical, intent(in) :: is_root_pe
+  integer, optional, intent(in) :: jshift, x_halo, y_halo, ishift
+  logical, optional, intent(in) :: is_optional
+end subroutine register_restart_field_netcfd_4d_other
+
+subroutine register_restart_field_netcfddomain_3d(file, str, ak, dim_names)
+  type(FmsNetcdfDomainFile_t), intent(in) :: file
+  character(len=*), intent(in) :: str
+  real, intent(in) :: ak(:,:)
+  character(len=8), dimension(3), intent(in)  :: dim_names
+end subroutine register_restart_field_netcfddomain_3d
+
+subroutine register_restart_field_netcfddomain_4d(file, str, ak, dim_names, is_optional)
+  type(FmsNetcdfDomainFile_t), intent(in) :: file
+  character(len=*), intent(in) :: str
+  real, intent(in) :: ak(:,:,:)
+  character(len=8), dimension(4), intent(in)  :: dim_names
+  logical, optional, intent(in) :: is_optional
+end subroutine register_restart_field_netcfddomain_4d
+
+subroutine register_restart_field_netcfddomain_4d_other(file, str, ak, indices, global_size, pelist, is_root_pe, jshift, x_halo, y_halo, ishift)
+  type(FmsNetcdfDomainFile_t), intent(in) :: file
+  character(len=*), intent(in) :: str
+  real, intent(in) :: ak(:,:,:)
+  integer, intent(in) :: indices(:), global_size(:), pelist(:)
+  logical, intent(in) :: is_root_pe
+  integer, optional, intent(in) :: jshift, x_halo, y_halo, ishift
+end subroutine register_restart_field_netcfddomain_4d_other
+
+! subroutine register_restart_field_netcfddomain_nd(file, str, ak, dim_names_alloc, is_optional)
+!   type(FmsNetcdfDomainFile_t), intent(in) :: file
+!   character(len=*), intent(in) :: str
+!   real, intent(in) :: ak(:,:)
+!   character(len=8), allocatable, intent(in)  :: dim_names_alloc(:)
+!   logical, optional, intent(in) :: is_optional
+! end subroutine register_restart_field_netcfddomain_nd
 
 integer function open_file_string(file, form, action, access, threading, recl, dist)
    character(len=*), intent(in) :: file
@@ -137,12 +407,22 @@ integer function open_file_string(file, form, action, access, threading, recl, d
    logical         , intent(in), optional :: dist  ! Distributed open?
 end function open_file_string
 
-integer function open_file_netcfd(file, form, action, access, threading, recl, dist)
+integer function open_file_netcfd(file, form, action, access, threading, recl, dist, is_restart, pelist)
    type(FmsNetcdfFile_t), intent(in) :: file
    character(len=*), intent(in), optional :: form, action, access, threading
    integer         , intent(in), optional :: recl
    logical         , intent(in), optional :: dist  ! Distributed open?
+   logical         , intent(in), optional :: is_restart
+   integer, allocatable, dimension(:), intent(in), optional :: pelist 
 end function open_file_netcfd
+
+integer function open_file_netcfddomain(file, name, action, fv_domain, is_restart, pelist)
+   type(FmsNetcdfDomainFile_t), intent(in) :: file
+   character(len=*), intent(in), optional :: name, action
+   type(domain2d),   intent(in), optional :: fv_domain
+   logical         , intent(in), optional :: is_restart
+   integer, allocatable, dimension(:), intent(in), optional :: pelist 
+end function open_file_netcfddomain
 
 subroutine close_file_int(unit, status, dist)
    integer,          intent(in)           :: unit
@@ -155,6 +435,12 @@ subroutine close_file_netcfd(unit, status, dist)
    character(len=*), intent(in), optional :: status
    logical,          intent(in), optional :: dist
 end subroutine close_file_netcfd
+
+subroutine close_file_netcfddomain(unit, status, dist)
+  type(FmsNetcdfDomainFile_t), intent(in) :: unit
+  character(len=*), intent(in), optional :: status
+  logical,          intent(in), optional :: dist
+end subroutine close_file_netcfddomain
 
 subroutine get_variable_attribute(file, string, arg, arg2)
   type(FmsNetcdfFile_t), intent(in) :: file
@@ -181,6 +467,13 @@ subroutine read_data_netcdfdomain_2d(src, string, dst, corner, edge_lengths)
   real, intent(inout) :: dst(:,:)
   integer, optional, intent(in) :: corner(:), edge_lengths(:)
 end subroutine read_data_netcdfdomain_2d
+
+subroutine read_data_netcdfdomain_3d(src, string, dst, corner, edge_lengths)
+  type(FmsNetcdfDomainFile_t), intent(in) :: src
+  character(len=*), intent(in) :: string
+  real, intent(inout) :: dst(:,:,:)
+  integer, optional, intent(in) :: corner(:), edge_lengths(:)
+end subroutine read_data_netcdfdomain_3d
 
 subroutine read_data_netcdf_char(src, string, dst, corner, edge_lengths)
   type(FmsNetcdfFile_t), intent(in) :: src

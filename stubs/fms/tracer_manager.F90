@@ -1,11 +1,23 @@
 module tracer_manager_mod
-
+use field_manager_mod
 implicit none
 private
 
-public get_tracer_index, get_tracer_names, get_number_tracers
+public get_tracer_index, get_tracer_names, get_number_tracers, set_tracer_profile, &
+       adjust_mass
 
 contains
+
+logical function adjust_mass(model, n, err_msg)
+    integer, intent(in) :: model, n
+    character(len=*), intent(out), optional :: err_msg
+end function adjust_mass
+
+subroutine set_tracer_profile(model, num_tracers, q)
+    integer,  intent(in) :: model 
+    integer, intent(in) :: num_tracers 
+    real, intent(inout) :: q(:,:,:)
+end subroutine
 
 subroutine get_number_tracers(model, num_tracers, num_prog, num_diag, num_family)
     integer,  intent(in) :: model 
