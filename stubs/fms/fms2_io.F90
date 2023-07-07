@@ -411,14 +411,14 @@ subroutine register_restart_field_netcfddomain_3d_other(file, str, ak, indices, 
   integer, optional, intent(in) :: jshift, x_halo, y_halo, ishift
 end subroutine register_restart_field_netcfddomain_3d_other
 
-logical function open_file_string(file, form, action, access, threading, recl, dist)
+integer function open_file_string(file, form, action, access, threading, recl, dist)
    character(len=*), intent(in) :: file
    character(len=*), intent(in), optional :: form, action, access, threading
    integer         , intent(in), optional :: recl
    logical         , intent(in), optional :: dist  ! Distributed open?
 end function open_file_string
 
-logical function open_file_netcfd(file, form, action, access, threading, recl, dist, is_restart, pelist)
+integer function open_file_netcfd(file, form, action, access, threading, recl, dist, is_restart, pelist)
    type(FmsNetcdfFile_t), intent(in) :: file
    character(len=*), intent(in), optional :: form, action, access, threading
    integer         , intent(in), optional :: recl
@@ -427,7 +427,7 @@ logical function open_file_netcfd(file, form, action, access, threading, recl, d
    integer, allocatable, dimension(:), intent(in), optional :: pelist 
 end function open_file_netcfd
 
-logical function open_file_netcfddomain(file, name, action, fv_domain, is_restart, pelist, dont_add_res_to_filename)
+integer function open_file_netcfddomain(file, name, action, fv_domain, is_restart, pelist, dont_add_res_to_filename)
    type(FmsNetcdfDomainFile_t), intent(in) :: file
    character(len=*), intent(in), optional :: name, action
    type(domain2d),   intent(in), optional :: fv_domain
