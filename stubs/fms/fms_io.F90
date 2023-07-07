@@ -15,7 +15,7 @@ procedure (func), pointer :: fmsset_filename_appendix => null ()
 private
 
 public :: restart_file_type, open_namelist_file, file_exist, field_exist, &
-          get_mosaic_tile_grid
+          get_mosaic_tile_grid, set_filename_appendix
 
 integer, parameter, private :: max_split_file = 50
 integer, parameter, private :: max_fields=400
@@ -161,6 +161,10 @@ logical function field_exist (file_name, field_name, domain, no_domain)
    type(domain2d), intent(in), optional, target :: domain
    logical,       intent(in),  optional         :: no_domain
 end function field_exist
+
+subroutine set_filename_appendix(z)
+   character(len=6), intent (in) :: z
+end subroutine set_filename_appendix
 
 end module fms_io_mod
 

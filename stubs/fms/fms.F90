@@ -158,7 +158,7 @@ module fms_mod
     !  ---- version number -----
     
     ! Include variable "version" to be written to log file.
-    #include<file_version.h>
+    ! #include "file_version.h"
     
       logical :: module_is_initialized = .FALSE.
     
@@ -352,7 +352,7 @@ module fms_mod
     
     end subroutine write_version_number
     
-    #include "fms_r4.fh"
-    #include "fms_r8.fh"
+    ! #include "fms_r4.fh"
+    ! #include "fms_r8.fh"
     
     end module fms_mod

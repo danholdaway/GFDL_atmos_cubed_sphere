@@ -32,7 +32,8 @@ public DGRID_NE, CGRID_NE, &
        mpp_group_update_initialized, mpp_create_group_update, mpp_reset_group_update_field, &
        mpp_get_io_domain_layout, mpp_get_layout, mpp_copy_domain, mpp_do_group_update, &
        mpp_get_domain_shift, AGRID, BITWISE_EFP_SUM, mpp_get_tile_id, &
-       mpp_get_compute_domains, mpp_get_domain_components, mpp_domains_set_stack_size
+       mpp_get_compute_domains, mpp_get_domain_components, mpp_domains_set_stack_size, &
+       mpp_define_nest_domains
 
 
   !!!!!!!!!FV_ARRAYS!!!!!!!!!!!!
@@ -418,10 +419,14 @@ end type DomainCommunicator2D
   end interface
 
   interface mpp_global_field
-     module procedure mpp_global_field2D_2d
-     module procedure mpp_global_field2D_3d
-     module procedure mpp_global_field2D_4d
-     module procedure mpp_global_field2D_5d
+     module procedure mpp_global_field2d_r4_2d
+     module procedure mpp_global_field2d_r4_3d
+     module procedure mpp_global_field2d_r4_4d
+     module procedure mpp_global_field2d_r4_5d
+     module procedure mpp_global_field2d_r8_2d
+     module procedure mpp_global_field2d_r8_3d
+     module procedure mpp_global_field2d_r8_4d
+     module procedure mpp_global_field2d_r8_5d
   end interface
 
   interface mpp_update_domains
@@ -494,6 +499,21 @@ module procedure mpp_get_boundary_r8_3d
 end interface
 
  contains
+
+ subroutine mpp_define_nest_domains(nest_domain, domain, num_nest, nest_level, tile_fine, tile_coarse, &
+  istart_coarse, icount_coarse, jstart_coarse, jcount_coarse, npes_nest_tile, &
+  x_refine, y_refine, extra_halo, name)
+type(nest_domain_type),     intent(inout) :: nest_domain 
+type(domain2D), target,     intent(in   ) :: domain 
+integer,                    intent(in   ) :: num_nest 
+integer,                    intent(in   ) :: nest_level(:) 
+integer,                    intent(in   ) :: tile_fine(:), tile_coarse(:) 
+integer, intent(in ) :: istart_coarse(:), icount_coarse(:), jstart_coarse(:), jcount_coarse(:)
+integer,                    intent(in   ) :: npes_nest_tile(:)
+integer,                    intent(in   ) :: x_refine(:), y_refine(:) 
+integer,          optional, intent(in   ) :: extra_halo 
+character(len=*), optional, intent(in   ) :: name 
+ end subroutine mpp_define_nest_domains
 
  subroutine mpp_get_global_domain( domain, xbegin, xend, ybegin, yend, xsize, xmax_size, ysize, ymax_size, &
   tile_count, position )
@@ -1062,46 +1082,55 @@ end function mpp_get_ntile_count
 
 ! mpp_global_field
 ! ----------------
- subroutine mpp_global_field2d_2d(domain,field_this_grid,field,position)
-
+ subroutine mpp_global_field2d_r4_2d(domain,field_this_grid,field,position)
   type(domain2D), intent(in) :: domain
-  real(FVPRC), intent(in) :: field_this_grid(:,:)
-  real(FVPRC), intent(inout) :: field(:,:)
+  real(kind=4), intent(in) :: field_this_grid(:,:)
+  real(kind=4), intent(inout) :: field(:,:)
   integer, intent(in), optional :: position
-
-   field = 2*field_this_grid
-
- endsubroutine mpp_global_field2d_2d
- subroutine mpp_global_field2d_3d(domain,field_this_grid,field,position)
-
+ endsubroutine mpp_global_field2d_r4_2d
+ subroutine mpp_global_field2d_r4_3d(domain,field_this_grid,field,position)
   type(domain2D), intent(in) :: domain
-  real(FVPRC), intent(in) :: field_this_grid(:,:,:)
-  real(FVPRC), intent(inout) :: field(:,:,:)
+  real(kind=4), intent(in) :: field_this_grid(:,:,:)
+  real(kind=4), intent(inout) :: field(:,:,:)
   integer, intent(in), optional :: position
-
-   field = 2*field_this_grid
-
- endsubroutine mpp_global_field2d_3d
- subroutine mpp_global_field2d_4d(domain,field_this_grid,field,position)
-
+ endsubroutine mpp_global_field2d_r4_3d
+ subroutine mpp_global_field2d_r4_4d(domain,field_this_grid,field,position)
   type(domain2D), intent(in) :: domain
-  real(FVPRC), intent(in) :: field_this_grid(:,:,:,:)
-  real(FVPRC), intent(inout) :: field(:,:,:,:)
+  real(kind=4), intent(in) :: field_this_grid(:,:,:,:)
+  real(kind=4), intent(inout) :: field(:,:,:,:)
   integer, intent(in), optional :: position
-
-   field = 2*field_this_grid
-
- endsubroutine mpp_global_field2d_4d
- subroutine mpp_global_field2d_5d(domain,field_this_grid,field,position)
-
+ endsubroutine mpp_global_field2d_r4_4d
+ subroutine mpp_global_field2d_r4_5d(domain,field_this_grid,field,position)
   type(domain2D), intent(in) :: domain
-  real(FVPRC), intent(in) :: field_this_grid(:,:,:,:,:)
-  real(FVPRC), intent(inout) :: field(:,:,:,:,:)
+  real(kind=4), intent(in) :: field_this_grid(:,:,:,:,:)
+  real(kind=4), intent(inout) :: field(:,:,:,:,:)
   integer, intent(in), optional :: position
+ endsubroutine mpp_global_field2d_r4_5d
 
-   field = 2*field_this_grid
-
- endsubroutine mpp_global_field2d_5d
+ subroutine mpp_global_field2d_r8_2d(domain,field_this_grid,field,position)
+  type(domain2D), intent(in) :: domain
+  real(kind=8), intent(in) :: field_this_grid(:,:)
+  real(kind=8), intent(inout) :: field(:,:)
+  integer, intent(in), optional :: position
+ endsubroutine mpp_global_field2d_r8_2d
+ subroutine mpp_global_field2d_r8_3d(domain,field_this_grid,field,position)
+  type(domain2D), intent(in) :: domain
+  real(kind=8), intent(in) :: field_this_grid(:,:,:)
+  real(kind=8), intent(inout) :: field(:,:,:)
+  integer, intent(in), optional :: position
+ endsubroutine mpp_global_field2d_r8_3d
+ subroutine mpp_global_field2d_r8_4d(domain,field_this_grid,field,position)
+  type(domain2D), intent(in) :: domain
+  real(kind=8), intent(in) :: field_this_grid(:,:,:,:)
+  real(kind=8), intent(inout) :: field(:,:,:,:)
+  integer, intent(in), optional :: position
+ endsubroutine mpp_global_field2d_r8_4d
+ subroutine mpp_global_field2d_r8_5d(domain,field_this_grid,field,position)
+  type(domain2D), intent(in) :: domain
+  real(kind=8), intent(in) :: field_this_grid(:,:,:,:,:)
+  real(kind=8), intent(inout) :: field(:,:,:,:,:)
+  integer, intent(in), optional :: position
+ endsubroutine mpp_global_field2d_r8_5d
 
 
 

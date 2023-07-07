@@ -104,7 +104,8 @@ list(APPEND stubs_srcs
   stubs/fms/ensemble_manager.F90
   stubs/fms/mosaic.F90
   stubs/fms/sat_vapor_pres.F90
-  stubs/fms/constantsR4.F90)
+  stubs/fms/constantsR4.F90
+  stubs/netcdf/netcdf.F90)
 
 list(APPEND tools_srcs
   tools/coarse_grained_diagnostics.F90

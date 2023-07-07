@@ -4,9 +4,28 @@ implicit none
 private
 
 public get_tracer_index, get_tracer_names, get_number_tracers, set_tracer_profile, &
-       adjust_mass
+       adjust_mass, get_tracer_indices, check_if_prognostic, register_tracers
 
 contains
+
+subroutine register_tracers(model, num_tracers, num_prog, num_diag, num_family)
+    integer, intent(in) :: model 
+    integer, intent(out) :: num_tracers 
+    integer, intent(out) :: num_prog 
+    integer, intent(out) :: num_diag 
+    integer, intent(out), optional :: num_family
+end subroutine
+
+logical function check_if_prognostic(model, n, err_msg)
+    integer, intent(in) :: model
+    integer, intent(in) :: n 
+    character(len=*), intent(out), optional :: err_msg
+end function check_if_prognostic
+
+subroutine get_tracer_indices(model, ind, prog_ind, diag_ind, fam_ind)
+    integer, intent(in) :: model
+    integer, intent(out), dimension(:), optional :: ind, prog_ind, diag_ind, fam_ind
+end subroutine get_tracer_indices
 
 logical function adjust_mass(model, n, err_msg)
     integer, intent(in) :: model, n
