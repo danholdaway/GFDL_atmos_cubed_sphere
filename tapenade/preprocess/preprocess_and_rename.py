@@ -11,6 +11,10 @@ base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 # Step 1: Run the GNU preprocessor on the files in the model and tools directories
 # --------------------------------------------------------------------------------
 
+# Include directories beyond those being preprocessed
+additional_include_dirs = ['stubs/fms']
+additional_include_dirs = [os.path.join(base_path, directory) for directory in additional_include_dirs]
+
 # Directories to preprocess
 directory_names = ['model', 'tools']
 
@@ -18,8 +22,8 @@ directory_names = ['model', 'tools']
 directories_to_process = [os.path.join(base_path, directory) for directory in directory_names]
 
 # Gnu include path
-include_dirs = f'-I{base_path}' + ' -I' + ' -I'.join(directories_to_process)
-
+include_dirs = f'-I{base_path}' + ' -I' + ' -I'.join(directories_to_process) + ' -I' + ' -I'.join(additional_include_dirs)
+print(include_dirs)
 # Definitions to use for compilation
 defs = '-DSPMD -DMOIST_CAPPA -DUSE_COND -DGFS_PHYS=0 -DGFS_TYPES -DUSE_GFSL63 -Duse_WRTCOMP'
 
@@ -52,45 +56,39 @@ for directory, directory_name in zip(directories_to_process, directory_names):
 
 preprocessed_files = glob.glob(os.path.join(base_path, 'pert', '*', '*0'))
 
+# RegEx for finding module names
+module_name_pattern = re.compile(r"^\s*(?:module)\s+(?!procedure\s)([a-z]\w*)", re.IGNORECASE | re.MULTILINE)
+# RegEx for partitioning modules names if they end with "_mod"
+name_partition_pattern = re.compile(r"\b([a-z]\w*?)(_mod)?\b", re.IGNORECASE)
+
+# Map from old_module_name -> new_module_name
+name_map = {}
+
+# Identify modules for renaming
 for preprocessed_file in preprocessed_files:
 
     with open(preprocessed_file, 'r') as f:
-        file_lines = f.read().split('\n')
+        file_content = f.read()
 
-        for ind, file_line in enumerate(file_lines):
+        matches = module_name_pattern.findall(file_content)
+        for module_name in matches:
+            new_module_name = name_partition_pattern.sub(r"\g<1>_nlm\g<2>", module_name)
+            name_map[module_name] = new_module_name.lower()
 
-            file_line_strip = file_line.strip().lower()
+print("Modules to rename with \"_nlm\": ", list(name_map.keys()))
 
-            file_line_strip_split = file_line_strip.split(' ')
+# RegEx for matching names to replace
+names_to_replace_pattern = re.compile("\\b(" + "|".join(name_map.keys()) + ")\\b", re.IGNORECASE | re.MULTILINE)
 
-            # Remove any element with comments
-            file_line_strip_split = [element for element in file_line_strip_split if '!' not in element]
+# Find and replace the identified modules in each file
+for preprocessed_file in preprocessed_files:
 
-            if len(file_line_strip_split) > 0:
+    with open(preprocessed_file, 'r') as f:
+        file_content = f.read()           
 
-                if file_line_strip_split[0] == 'module' and len(file_line_strip_split) == 2:
+        # Replace all identified module names
+        new_file_content = names_to_replace_pattern.sub(lambda x: name_map[x.group(0).lower()], file_content)
 
-                    # Found module beginning
-                    module_name = file_line_strip_split[1]
-
-                    # Check if module name ends in _mod
-                    if module_name[-4:] == '_mod':
-                        # Place _nlm before _mod
-                        new_module_name = module_name[:-4] + '_nlm' + module_name[-4:]
-                    else:
-                        new_module_name = module_name + '_nlm'
-
-                    # Replace module name with new module name in file_lines
-                    if '_nlm' not in module_name:
-                        file_lines[ind] = file_line.replace(module_name, new_module_name)
-
-                elif file_line_strip_split[0] == 'end' and file_line_strip_split[1] == 'module' or \
-                     file_line_strip_split[0] == 'endmodule':
-
-                    # Replace module name with new module name in file_lines
-                    if '_nlm' not in module_name:
-                        file_lines[ind] = file_line.replace(module_name, new_module_name)
-
-        # Write the new file with updated file_lines
-        with open(preprocessed_file, 'w') as f:
-            f.write('\n'.join(file_lines))
+    # Write the new file with updated file_lines
+    with open(preprocessed_file, 'w') as f:
+        f.write(new_file_content)
