@@ -39,7 +39,7 @@
 !   </tr>
 !   <tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>mp_reduce_min, is_master</td>
 !   </tr>
 !   <tr>
@@ -63,7 +63,7 @@ module fv_sg_nlm_mod
 
 
 
-  use fv_mp_mod,          only: mp_reduce_min, is_master
+  use fv_mp_nlm_mod,          only: mp_reduce_min, is_master
 
 
 

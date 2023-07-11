@@ -40,42 +40,42 @@ module fv_grid_tools_nlm_mod
 !     <td>file_exist, field_exist, read_data, get_global_att_value, get_var_att_value</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_grid_type, fv_grid_bounds_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_control_mod</td>
+!     <td>fv_control_nlm_mod</td>
 !     <td>fv_init, fv_end, ngrids</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>prt_maxmin, prt_gb_nh_sh, prt_height</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>set_eta, set_external_eta</td>
 !   </tr>
 !   <tr>
-!     <td>fv_fill_mod</td>
+!     <td>fv_fill_nlm_mod</td>
 !     <td>fillz</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>gnomonic_grids, great_circle_dist,mid_pt_sphere, spherical_angle,
 !        cell_center2, get_area, inner_prod, fill_ghost, direct_transform,
 !        dist2side_latlon,spherical_linear_interpolation, big_number</td>
 !   </tr>
 !   <tr>
-!     <td>fv_io_mod</td>
+!     <td>fv_io_nlm_mod</td>
 !     <td>fv_io_read_tracers</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng, is_master, fill_corners, XDir, YDir,mp_gather,
 !         mp_bcst, mp_reduce_max, mp_stop </td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
@@ -107,7 +107,7 @@ module fv_grid_tools_nlm_mod
 !         SCALAR_PAIR,CORNER, CENTER, XUPDATE</td>
 !   </tr>
 !   <tr>
-!     <td>sorted_index_mod</td>
+!     <td>sorted_index_nlm_mod</td>
 !     <td>sorted_inta, sorted_intb</td>
 !   </tr>
 !   <tr>
@@ -119,16 +119,16 @@ module fv_grid_tools_nlm_mod
 
   use constants_mod,     only: grav, omega, pi=>pi_8, cnst_radius=>radius, small_fac
   use fms_mod,           only: mpp_clock_id, mpp_clock_begin, mpp_clock_end, CLOCK_ROUTINE, clock_flag_default
-  use fv_arrays_mod,     only: fv_atmos_type, fv_grid_type, fv_grid_bounds_type, R_GRID
-  use fv_grid_utils_mod, only: gnomonic_grids, great_circle_dist, &
+  use fv_arrays_nlm_mod,     only: fv_atmos_type, fv_grid_type, fv_grid_bounds_type, R_GRID
+  use fv_grid_utils_nlm_mod, only: gnomonic_grids, great_circle_dist, &
                                mid_pt_sphere, spherical_angle, &
                                cell_center2, get_area, inner_prod, fill_ghost, &
                                direct_transform, cube_transform, dist2side_latlon, &
                                spherical_linear_interpolation, big_number
-  use fv_timing_mod,     only: timing_on, timing_off
-  use fv_mp_mod,         only: is_master, fill_corners, XDir, YDir
-  use fv_mp_mod,         only: mp_bcst, mp_reduce_max, mp_stop, grids_master_procs
-  use sorted_index_mod,  only: sorted_inta, sorted_intb
+  use fv_timing_nlm_mod,     only: timing_on, timing_off
+  use fv_mp_nlm_mod,         only: is_master, fill_corners, XDir, YDir
+  use fv_mp_nlm_mod,         only: mp_bcst, mp_reduce_max, mp_stop, grids_master_procs
+  use sorted_index_nlm_mod,  only: sorted_inta, sorted_intb
   use mpp_mod,           only: mpp_error, FATAL, get_unit, mpp_chksum, mpp_pe, stdout, &
                                mpp_send, mpp_recv, mpp_sync_self, EVENT_RECV, mpp_npes, &
                                mpp_sum, mpp_max, mpp_min, mpp_root_pe, mpp_broadcast, mpp_gather
@@ -2047,7 +2047,7 @@ contains
     if( open_file(Grid_input, grid_file, "read") ) then
        if( variable_exists(Grid_input, 'atm_mosaic_file') .OR. variable_exists(Grid_input, 'gridfiles') ) then
           stdunit = stdout()
-          write(stdunit,*) '==>Note from fv_grid_tools_mod(read_grid): read atmosphere grid from mosaic version grid'
+          write(stdunit,*) '==>Note from fv_grid_tools_nlm_mod(read_grid): read atmosphere grid from mosaic version grid'
        else
           call mpp_error(FATAL, 'fv_grid_tools(read_grid): neither atm_mosaic_file nor gridfiles exists in file ' &
                //trim(grid_file))
@@ -2104,7 +2104,7 @@ contains
     grid(ie+2:ied+1,jsd:js-1,1:ndims)=0.
     grid(ie+2:ied+1,je+2:jed+1,1:ndims)=0.
     if(len_trim(units) < 6) call mpp_error(FATAL, &
-          "fv_grid_tools_mod(read_grid): the length of units must be no less than 6")
+          "fv_grid_tools_nlm_mod(read_grid): the length of units must be no less than 6")
     if(units(1:6) == 'degree') then
     if( .not. Atm%gridstruct%bounded_domain) then
        do j = js, je+1
@@ -2134,7 +2134,7 @@ contains
        enddo
     else
        print*, 'units is ' , trim(units), len_trim(units), mpp_pe()
-       call mpp_error(FATAL, 'fv_grid_tools_mod(read_grid): units must start with degree or radian')
+       call mpp_error(FATAL, 'fv_grid_tools_nlm_mod(read_grid): units must start with degree or radian')
     endif
 
     deallocate(tmpx, tmpy)
@@ -2305,7 +2305,7 @@ contains
           call mpp_sync_self(check=EVENT_RECV) ! To ensure recv is completed.
           do p = 0, nlist-1
              if(msg1(p) .NE. msg2(p)) then
-                call mpp_error(FATAL, "fv_grid_tools_mod(get_symmetry): mismatch on send and recv size")
+                call mpp_error(FATAL, "fv_grid_tools_nlm_mod(get_symmetry): mismatch on send and recv size")
              endif
           enddo
           call mpp_sync_self()
@@ -3493,7 +3493,7 @@ contains
       if( open_file(Grid_input, grid_file, "read") ) then
         if( variable_exists(Grid_input, 'atm_mosaic_file') .OR. variable_exists(Grid_input, 'gridfiles') ) then
           stdunit = stdout()
-          write(stdunit,*) '==>Note from fv_grid_tools_mod(read_grid): read atmosphere grid from mosaic version grid'
+          write(stdunit,*) '==>Note from fv_grid_tools_nlm_mod(read_grid): read atmosphere grid from mosaic version grid'
         else
           call mpp_error(FATAL, 'fv_grid_tools(read_grid): neither atm_mosaic_file nor gridfiles exists in file ' &
                //trim(grid_file))

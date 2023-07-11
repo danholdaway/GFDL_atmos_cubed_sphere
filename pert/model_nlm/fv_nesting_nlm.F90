@@ -35,7 +35,7 @@ module fv_nesting_nlm_mod
 !     <th>Functions Included</th>
 !  </tr>
 !  <tr>
-!     <td>boundary_mod</td>
+!     <td>boundary_nlm_mod</td>
 !     <td>update_coarse_grid,nested_grid_BC_send, nested_grid_BC_recv, nested_grid_BC_save_proc
 !         nested_grid_BC, nested_grid_BC_apply_intT</td>
 !   </tr>
@@ -48,40 +48,40 @@ module fv_nesting_nlm_mod
 !     <td>MODEL_ATMOS</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, fv_flags_type, fv_atmos_type, fv_nest_type, fv_diag_type,
 !         fv_nest_BC_type_3D,allocate_fv_nest_BC_type,  fv_atmos_type, fv_grid_bounds_type</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>sphum_ll_fix, range_check</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>ptop_min, g_sum, cubed_to_latlon, f_p</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mapz_mod</td>
+!     <td>fv_mapz_nlm_mod</td>
 !     <td>mappm, remap_2d</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is, ie, js, je, isd, ied, jsd, jed, isc, iec, jsc, jec,is_master,mp_reduce_sum</td>
 !   </tr>
 !   <tr>
-!     <td>fv_restart_mod</td>
+!     <td>fv_restart_nlm_mod</td>
 !     <td>d2a_setup, d2c_setup</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>neg_adj3</td>
 !   </tr>
 !  <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
-!     <td>init_hydro_mod</td>
+!     <td>init_hydro_nlm_mod</td>
 !     <td>p_var</td>
 !   </tr>
 !   <tr>
@@ -95,7 +95,7 @@ module fv_nesting_nlm_mod
 !         BITWISE_EFP_SUM, BITWISE_EXACT_SUM</td>
 !   </tr>
 !   <tr>
-!    <td>sw_core_mod</td>
+!    <td>sw_core_nlm_mod</td>
 !     <td>divergence_corner, divergence_corner_nest</td>
 !   </tr>
 !   <tr>
@@ -108,29 +108,29 @@ module fv_nesting_nlm_mod
    use mpp_domains_mod,     only: mpp_global_field
    use field_manager_mod,   only: MODEL_ATMOS
    use tracer_manager_mod,  only: get_tracer_index
-   use fv_sg_mod,           only: neg_adj3
+   use fv_sg_nlm_mod,           only: neg_adj3
    use mpp_domains_mod,     only: mpp_get_data_domain, mpp_get_compute_domain, mpp_get_global_domain
    use mpp_domains_mod,     only: AGRID, CGRID_NE, DGRID_NE, mpp_update_domains, domain2D
    use mpp_mod,             only: mpp_sync_self, mpp_sync, mpp_send, mpp_recv, mpp_error, FATAL, mpp_pe, WARNING, NOTE
    use mpp_domains_mod,     only: mpp_global_sum, BITWISE_EFP_SUM, BITWISE_EXACT_SUM
-   use boundary_mod,        only: update_coarse_grid
-   use boundary_mod,        only: nested_grid_BC_send, nested_grid_BC_recv, nested_grid_BC_save_proc
-   use boundary_mod,        only: nested_grid_BC, nested_grid_BC_apply_intT
-   use fv_arrays_mod,       only: fv_grid_type, fv_flags_type, fv_atmos_type, fv_nest_type, fv_diag_type, fv_nest_BC_type_3D
-   use fv_arrays_mod,       only: allocate_fv_nest_BC_type, fv_atmos_type, fv_grid_bounds_type, deallocate_fv_nest_BC_type
-   use fv_grid_utils_mod,   only: ptop_min, g_sum, cubed_to_latlon, f_p
-   use init_hydro_mod,      only: p_var
+   use boundary_nlm_mod,        only: update_coarse_grid
+   use boundary_nlm_mod,        only: nested_grid_BC_send, nested_grid_BC_recv, nested_grid_BC_save_proc
+   use boundary_nlm_mod,        only: nested_grid_BC, nested_grid_BC_apply_intT
+   use fv_arrays_nlm_mod,       only: fv_grid_type, fv_flags_type, fv_atmos_type, fv_nest_type, fv_diag_type, fv_nest_BC_type_3D
+   use fv_arrays_nlm_mod,       only: allocate_fv_nest_BC_type, fv_atmos_type, fv_grid_bounds_type, deallocate_fv_nest_BC_type
+   use fv_grid_utils_nlm_mod,   only: ptop_min, g_sum, cubed_to_latlon, f_p
+   use init_hydro_nlm_mod,      only: p_var
 
 
 
    use constants_mod,       only: grav, pi=>pi_8, radius, hlv, rdgas, cp_air, rvgas, cp_vapor, kappa
 
-   use fv_mapz_mod,         only: mappm, remap_2d
-   use fv_timing_mod,       only: timing_on, timing_off
-   use fv_mp_mod,           only: is_master
-   use fv_mp_mod,           only: mp_reduce_sum, global_nest_domain
-   use fv_diagnostics_mod,  only: sphum_ll_fix, range_check
-   use sw_core_mod,         only: divergence_corner, divergence_corner_nest
+   use fv_mapz_nlm_mod,         only: mappm, remap_2d
+   use fv_timing_nlm_mod,       only: timing_on, timing_off
+   use fv_mp_nlm_mod,           only: is_master
+   use fv_mp_nlm_mod,           only: mp_reduce_sum, global_nest_domain
+   use fv_diagnostics_nlm_mod,  only: sphum_ll_fix, range_check
+   use sw_core_nlm_mod,         only: divergence_corner, divergence_corner_nest
    use time_manager_mod,    only: time_type
 
 implicit none

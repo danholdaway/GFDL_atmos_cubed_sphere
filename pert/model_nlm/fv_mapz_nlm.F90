@@ -42,19 +42,19 @@ module fv_mapz_nlm_mod
 !     <td>MODEL_ATMOS</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type</td>
 !   </tr>
 !   <tr>
-!     <td>fv_fill_mod</td>
+!     <td>fv_fill_nlm_mod</td>
 !     <td>fillz</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>g_sum, ptop_min</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is_master</td>
 !   </tr>
 !   <tr>
@@ -66,11 +66,11 @@ module fv_mapz_nlm_mod
 !     <td>ccpp_suite, cdata_tile, GFDL_interstitial</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
-!     <td>fv_tracer2d_mod</td>
+!     <td>fv_tracer2d_nlm_mod</td>
 !     <td>tracer_2d, tracer_2d_1L, tracer_2d_nested</td>
 !   </tr>
 !   <tr>
@@ -90,13 +90,13 @@ module fv_mapz_nlm_mod
   use constants_mod,     only: radius, pi=>pi_8, rvgas, rdgas, grav, hlv, hlf, cp_air, cp_vapor
   use tracer_manager_mod,only: get_tracer_index
   use field_manager_mod, only: MODEL_ATMOS
-  use fv_grid_utils_mod, only: g_sum, ptop_min, cubed_to_latlon, update_dwinds_phys
-  use fv_fill_mod,       only: fillz
+  use fv_grid_utils_nlm_mod, only: g_sum, ptop_min, cubed_to_latlon, update_dwinds_phys
+  use fv_fill_nlm_mod,       only: fillz
   use mpp_domains_mod,   only: mpp_update_domains, domain2d
   use mpp_mod,           only: NOTE, FATAL, mpp_error, get_unit, mpp_root_pe, mpp_pe
-  use fv_arrays_mod,     only: fv_grid_type, fv_grid_bounds_type, R_GRID, inline_mp_type
-  use fv_timing_mod,     only: timing_on, timing_off
-  use fv_mp_mod,         only: is_master, mp_reduce_min, mp_reduce_max
+  use fv_arrays_nlm_mod,     only: fv_grid_type, fv_grid_bounds_type, R_GRID, inline_mp_type
+  use fv_timing_nlm_mod,     only: timing_on, timing_off
+  use fv_mp_nlm_mod,         only: is_master, mp_reduce_min, mp_reduce_max
   ! CCPP fast physics
   use ccpp_static_api,   only: ccpp_physics_run
   use CCPP_data,         only: ccpp_suite
@@ -231,11 +231,8 @@ contains
   integer:: nt, liq_wat, ice_wat, rainwat, snowwat, cld_amt, graupel, hailwat, ccn_cm3, iq, n, kmp, kp, k_next
   integer :: ierr
 
-      !ccpp_associate: associate( fast_mp_consv => GFDL_interstitial%fast_mp_consv, &
-      !                           kmp           => GFDL_interstitial%kmp            )
-
-      fast_mp_consv => GFDL_interstitial%fast_mp_consv
-      kmp           => GFDL_interstitial%kmp
+      ccpp_associate: associate( fast_mp_consv => GFDL_interstitial%fast_mp_consv, &
+                                 kmp           => GFDL_interstitial%kmp            )
 
        k1k = rdgas/cv_air   ! akap / (1.-akap) = rg/Cv=0.4
         rg = rdgas
@@ -813,9 +810,7 @@ endif        ! end last_step check
   endif
 !$OMP end parallel
 
-  !end associate ccpp_associate
-  nullify(fast_mp_consv)
-  nullify(kmp)
+  end associate ccpp_associate
 
  end subroutine Lagrangian_to_Eulerian
 
@@ -3263,9 +3258,9 @@ endif        ! end last_step check
         cvm(i) = (1.-(qv(i)+qd(i)))*cv_air + qv(i)*cv_vap + ql(i)*c_liq + qs(i)*c_ice
      enddo
   case(7)
-     do i=is,ie
+     do i=is,ie 
         qv(i) = q(i,j,k,sphum)
-        ql(i) = q(i,j,k,liq_wat) + q(i,j,k,rainwat)
+        ql(i) = q(i,j,k,liq_wat) + q(i,j,k,rainwat) 
         qs(i) = q(i,j,k,ice_wat) + q(i,j,k,snowwat) + q(i,j,k,graupel) + q(i,j,k,hailwat)
         qd(i) = ql(i) + qs(i)
         cvm(i) = (1.-(qv(i)+qd(i)))*cv_air + qv(i)*cv_vap + ql(i)*c_liq + qs(i)*c_ice
@@ -3356,9 +3351,9 @@ endif        ! end last_step check
      enddo
 
   case(7)
-     do i=is,ie
+     do i=is,ie 
         qv(i) = q(i,j,k,sphum)
-        ql(i) = q(i,j,k,liq_wat) + q(i,j,k,rainwat)
+        ql(i) = q(i,j,k,liq_wat) + q(i,j,k,rainwat) 
         qs(i) = q(i,j,k,ice_wat) + q(i,j,k,snowwat) + q(i,j,k,graupel) + q(i,j,k,hailwat)
         qd(i) = ql(i) + qs(i)
         cpm(i) = (1.-(qv(i)+qd(i)))*cp_air + qv(i)*cp_vapor + ql(i)*c_liq + qs(i)*c_ice

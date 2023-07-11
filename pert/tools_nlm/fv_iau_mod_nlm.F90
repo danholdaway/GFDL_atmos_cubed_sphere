@@ -44,12 +44,12 @@ module fv_iau_nlm_mod
   use mpp_domains_mod,     only: domain2d
 
   use constants_mod,       only: pi=>pi_8
-  use fv_arrays_mod,       only: fv_atmos_type,       &
+  use fv_arrays_nlm_mod,       only: fv_atmos_type,       &
                                  fv_grid_type,        &
                                  fv_grid_bounds_type, &
                                  R_GRID
-  use fv_mp_mod,           only: is_master
-  use sim_nc_mod,          only: open_ncfile,         &
+  use fv_mp_nlm_mod,           only: is_master
+  use sim_nc_nlm_mod,          only: open_ncfile,         &
                                  close_ncfile,        &
                                  get_ncdim1,          &
                                  get_var1_double,     &
@@ -65,7 +65,7 @@ module fv_iau_nlm_mod
 
 
   use block_control_mod,   only: block_control_type
-  use fv_treat_da_inc_mod, only: remap_coef
+  use fv_treat_da_inc_nlm_mod, only: remap_coef
   use tracer_manager_mod,  only: get_tracer_names,get_tracer_index, get_number_tracers
   use field_manager_mod,   only: MODEL_ATMOS
   implicit none

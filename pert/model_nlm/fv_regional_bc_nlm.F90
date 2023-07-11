@@ -51,23 +51,23 @@ module fv_regional_nlm_mod
                                ,time_type,time_type_to_real
    use constants_mod,     only: cp_air, cp_vapor, grav, kappa           &
                                ,pi=>pi_8,rdgas, rvgas
-   use fv_arrays_mod,     only: fv_atmos_type                           &
+   use fv_arrays_nlm_mod,     only: fv_atmos_type                           &
                                ,fv_grid_bounds_type                     &
                                ,fv_regional_bc_bounds_type              &
                                ,R_GRID                                  &
                                ,fv_nest_BC_type_3D                      &
                                ,allocate_fv_nest_BC_type
 
-   use fv_diagnostics_mod,only: prt_gb_nh_sh, prt_height
-   use fv_grid_utils_mod, only: g_sum,mid_pt_sphere,get_unit_vect2      &
+   use fv_diagnostics_nlm_mod,only: prt_gb_nh_sh, prt_height
+   use fv_grid_utils_nlm_mod, only: g_sum,mid_pt_sphere,get_unit_vect2      &
                                ,get_latlon_vector,inner_prod            &
                                ,cell_center2
-   use fv_mapz_mod,       only: mappm, moist_cp, moist_cv
-   use fv_mp_mod,         only: is_master, mp_reduce_min, mp_reduce_max
-   use fv_fill_mod,       only: fillz
-   use fv_eta_mod,        only: get_eta_level
+   use fv_mapz_nlm_mod,       only: mappm, moist_cp, moist_cv
+   use fv_mp_nlm_mod,         only: is_master, mp_reduce_min, mp_reduce_max
+   use fv_fill_nlm_mod,       only: fillz
+   use fv_eta_nlm_mod,        only: get_eta_level
    use fms_mod,           only: check_nml_error
-   use boundary_mod,      only: fv_nest_BC_type_3D
+   use boundary_nlm_mod,      only: fv_nest_BC_type_3D
 
    implicit none
 
@@ -271,7 +271,7 @@ contains
 !*** The compiler must use IEEE-standard floating point for this to work
 !-----------------------------------------------------------------------
 !
-    use iso_c_binding, only: c_int32_t, c_int64_t
+    use, intrinsic :: iso_c_binding, only: c_int32_t, c_int64_t
     implicit none
 !
 !-----------------------------------------------------------------------
@@ -462,7 +462,7 @@ contains
       else
         nrows_blend=nrows_blend_in_data                                    !<-- # of blending rows in the BC files.
       endif
-
+      
       IF ( north_bc .or. south_bc ) THEN
         IF ( nrows_blend_user > jed - nhalo_model - (jsd + nhalo_model) + 1 ) THEN
         call mpp_error(FATAL,'Number of blending rows is greater than the north-south tile size!')
@@ -4305,7 +4305,7 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
 !
       integer,intent(in) :: is,ie,js,je                               &  !<-- Compute limits
                            ,isd,ied,jsd,jed                           &  !<-- Memory limits
-                           ,it                                           !<-- Acoustic step
+                           ,it                                           !<-- Acoustic step 
 !
       integer,intent(in),optional :: index4                              !<-- Index for the 4-D tracer array.
 !
@@ -5269,8 +5269,8 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 !---------------------------------------------------------------------
 !***  The following four subroutines are exact copies from
-!***  external_ic_mod.  That module must USE this module therefore
-!***  this module cannout USE external_IC_mod to get at those
+!***  external_ic_nlm_mod.  That module must USE this module therefore
+!***  this module cannout USE external_ic_nlm_mod to get at those
 !***  subroutines.  The routines may be moved to their own module.
 !---------------------------------------------------------------------
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -6747,7 +6747,10 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
       if (.not. lstatus) then
        if (mpp_pe() == 0) write(0,*) 'INPUT source not found ',lstatus,' set source=No Source Attribute'
        source='No Source Attribute'
-       call mpp_error(FATAL,'fv_regional_bc::get_data_source - input source not found in file gfs_data.nc. The accepted FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')
+       call mpp_error(FATAL,'fv_regional_bc::get_data_source - input source not &  
+            found in file gfs_data.nc. The accepted & 
+            FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", &
+            "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')                       
       endif
       call mpp_error(NOTE, 'INPUT gfs_data source string: '//trim(source))
 
@@ -6777,7 +6780,7 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
       character (len=80) :: source
       logical :: lstatus = .false.
       type(FmsNetcdfFile_t) :: Gfs_data
-      integer, allocatable, dimension(:) :: pes !< Array of the pes in the current pelist
+      integer, allocatable, dimension(:) :: pes !< Array of the pes in the current pelist               
 !
 ! Use the fms call here so we can actually get the return code value.
 ! The term 'source' is specified by 'chgres_cube'
@@ -6786,7 +6789,7 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
       allocate(pes(mpp_npes()))
       call mpp_get_current_pelist(pes)
 
-        if (open_file(Gfs_data , 'INPUT/gfs_bndy.tile7.000.nc', "read", pelist=pes)) then
+        if (open_file(Gfs_data , 'INPUT/gfs_bndy.tile7.000.nc', "read", pelist=pes)) then 
           lstatus = global_att_exists(Gfs_data, "source")
           if(lstatus) call get_global_attribute(Gfs_data, "source", source)
           call close_file(Gfs_data)
@@ -6794,9 +6797,13 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
 
       deallocate(pes)
       if (.not. lstatus) then
-       if (mpp_pe() == 0) write(0,*) 'INPUT source not found ',lstatus,' set source=No Source Attribute'
+       if (mpp_pe() == 0) write(0,*) 'INPUT source not found ',lstatus,' set source=No Source Attribute' 
        source='No Source Attribute'
-       call mpp_error(FATAL,'fv_regional_bc::get_lbc_source - input source not found in file gfs_bndy.tile7.000.nc. The accepted FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')
+       call mpp_error(FATAL,'fv_regional_bc::get_lbc_source - input source not &   
+            found in file &
+            gfs_bndy.tile7.000.nc. The accepted & 
+            FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", &
+            "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')          
       endif
       call mpp_error(NOTE, 'INPUT gfs_bndy source string: '//trim(source))
 

@@ -37,16 +37,16 @@ module nh_utils_nlm_mod
 !     <td>rdgas, cp_air, grav</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_bounds_type, fv_grid_type</td>
 !   </tr>
 !   <tr>
 !   <tr>
-!     <td>sw_core_mod</td>
+!     <td>sw_core_nlm_mod</td>
 !     <td>fill_4corners, del6_vt_flux</td>
 !   </tr>
 !   <tr>
-!     <td>tp_core_mod</td>
+!     <td>tp_core_nlm_mod</td>
 !     <td>fv_tp_2d</td>
 !   </tr>
 ! </table>
@@ -57,9 +57,9 @@ module nh_utils_nlm_mod
    use constants_mod,     only: rdgas, cp_air, grav
 
    use constants_mod,     only: pi_8
-   use tp_core_mod,       only: fv_tp_2d
-   use sw_core_mod,       only: fill_4corners, del6_vt_flux
-   use fv_arrays_mod,     only: fv_grid_bounds_type, fv_grid_type,fv_nest_BC_type_3d
+   use tp_core_nlm_mod,       only: fv_tp_2d
+   use sw_core_nlm_mod,       only: fill_4corners, del6_vt_flux
+   use fv_arrays_nlm_mod,     only: fv_grid_bounds_type, fv_grid_type,fv_nest_BC_type_3d
    use mpp_mod,           only: mpp_pe
 
 

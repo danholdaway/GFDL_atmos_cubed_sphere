@@ -33,7 +33,7 @@ module fv_dynamics_nlm_mod
 !     <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>boundary_mod</td>
+!     <td>boundary_nlm_mod</td>
 !     <td>nested_grid_BC_apply_intT</td>
 !   </tr>
 !   <tr>
@@ -45,7 +45,7 @@ module fv_dynamics_nlm_mod
 !     <td>send_data</td>
 !   </tr>
 !   <tr>
-!     <td>dyn_core_mod</td>
+!     <td>dyn_core_nlm_mod</td>
 !     <td>dyn_core, del2_cubed, init_ijk_mem</td>
 !   </tr>
 !   <tr>
@@ -53,31 +53,31 @@ module fv_dynamics_nlm_mod
 !     <td>MODEL_ATMOS</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, fv_flags_type, fv_atmos_type, fv_nest_type, fv_diag_type, fv_grid_bounds_type</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>fv_time, prt_mxm, range_check, prt_minmax</td>
 !   </tr>
 !   <tr>
-!     <td>fv_fill_mod</td>
+!     <td>fv_fill_nlm_mod</td>
 !     <td>fill2D</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>cubed_to_latlon, c2l_ord2, g_sum</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mapz_mod</td>
+!     <td>fv_mapz_nlm_mod</td>
 !     <td>compute_total_energy, Lagrangian_to_Eulerian, moist_cv, moist_cp</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is_master,group_halo_update_type, start_group_halo_update, complete_group_halo_update</td>
 !   </tr>
 !   <tr>
-!     <td>fv_nesting_mod</td>
+!     <td>fv_nesting_nlm_mod</td>
 !     <td>setup_nested_grid_BCs</td>
 !   </tr>
 !   <tr>
@@ -85,27 +85,27 @@ module fv_dynamics_nlm_mod
 !     <td>do_adiabatic_init</td>
 !   </tr>
 !   <tr>
-!     <td>fv_restart_mod</td>
+!     <td>fv_restart_nlm_mod</td>
 !     <td>d2a_setup, d2c_setup</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>neg_adj3</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>neg_adj2</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>neg_adj4</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
-!     <td>fv_tracer2d_mod</td>
+!     <td>fv_tracer2d_nlm_mod</td>
 !     <td>tracer_2d, tracer_2d_1L, tracer_2d_nested</td>
 !   </tr>
 !   <tr>
@@ -117,11 +117,11 @@ module fv_dynamics_nlm_mod
 !     <td>DGRID_NE, CGRID_NE, mpp_update_domains, domain2D</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>neg_adj3</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>neg_adj4</td>
 !   </tr>
 !   <tr>
@@ -135,30 +135,30 @@ module fv_dynamics_nlm_mod
 
    use constants_mod,       only: grav, pi=>pi_8, radius, hlv, rdgas, omega, rvgas, cp_vapor
 
-   use dyn_core_mod,        only: dyn_core, del2_cubed, init_ijk_mem
-   use fv_mapz_mod,         only: compute_total_energy, Lagrangian_to_Eulerian, moist_cv, moist_cp
-   use fv_tracer2d_mod,     only: tracer_2d, tracer_2d_1L, tracer_2d_nested
-   use fv_grid_utils_mod,   only: cubed_to_latlon, c2l_ord2, g_sum
-   use fv_fill_mod,         only: fill2D
-   use fv_mp_mod,           only: is_master
-   use fv_mp_mod,           only: group_halo_update_type
-   use fv_mp_mod,           only: start_group_halo_update, complete_group_halo_update
-   use fv_timing_mod,       only: timing_on, timing_off
+   use dyn_core_nlm_mod,        only: dyn_core, del2_cubed, init_ijk_mem
+   use fv_mapz_nlm_mod,         only: compute_total_energy, Lagrangian_to_Eulerian, moist_cv, moist_cp
+   use fv_tracer2d_nlm_mod,     only: tracer_2d, tracer_2d_1L, tracer_2d_nested
+   use fv_grid_utils_nlm_mod,   only: cubed_to_latlon, c2l_ord2, g_sum
+   use fv_fill_nlm_mod,         only: fill2D
+   use fv_mp_nlm_mod,           only: is_master
+   use fv_mp_nlm_mod,           only: group_halo_update_type
+   use fv_mp_nlm_mod,           only: start_group_halo_update, complete_group_halo_update
+   use fv_timing_nlm_mod,       only: timing_on, timing_off
    use diag_manager_mod,    only: send_data
-   use fv_diagnostics_mod,  only: fv_time, prt_mxm, range_check, prt_minmax
+   use fv_diagnostics_nlm_mod,  only: fv_time, prt_mxm, range_check, prt_minmax
    use mpp_domains_mod,     only: DGRID_NE, CGRID_NE, mpp_update_domains, domain2D
    use mpp_mod,             only: mpp_pe
    use field_manager_mod,   only: MODEL_ATMOS
    use tracer_manager_mod,  only: get_tracer_index
-   use fv_sg_mod,           only: neg_adj3, neg_adj2, neg_adj4
-   use fv_nesting_mod,      only: setup_nested_grid_BCs
-   use fv_regional_mod,     only: regional_boundary_update, set_regional_BCs
-   use fv_regional_mod,     only: dump_field, H_STAGGER, U_STAGGER, V_STAGGER
-   use fv_regional_mod,     only: a_step, p_step, k_step
-   use fv_regional_mod,     only: current_time_in_seconds
-   use boundary_mod,        only: nested_grid_BC_apply_intT
-   use fv_arrays_mod,       only: fv_grid_type, fv_flags_type, fv_atmos_type, fv_nest_type, fv_diag_type, fv_grid_bounds_type, inline_mp_type
-   use fv_nwp_nudge_mod,    only: do_adiabatic_init
+   use fv_sg_nlm_mod,           only: neg_adj3, neg_adj2, neg_adj4
+   use fv_nesting_nlm_mod,      only: setup_nested_grid_BCs
+   use fv_regional_nlm_mod,     only: regional_boundary_update, set_regional_BCs
+   use fv_regional_nlm_mod,     only: dump_field, H_STAGGER, U_STAGGER, V_STAGGER
+   use fv_regional_nlm_mod,     only: a_step, p_step, k_step
+   use fv_regional_nlm_mod,     only: current_time_in_seconds
+   use boundary_nlm_mod,        only: nested_grid_BC_apply_intT
+   use fv_arrays_nlm_mod,       only: fv_grid_type, fv_flags_type, fv_atmos_type, fv_nest_type, fv_diag_type, fv_grid_bounds_type, inline_mp_type
+   use fv_nwp_nudge_nlm_mod,    only: do_adiabatic_init
    use time_manager_mod,    only: get_time
 
 
@@ -202,7 +202,7 @@ contains
     use CCPP_data,         only: cdata => cdata_tile
     use CCPP_data,         only: GFDL_interstitial
 
-    use molecular_diffusion_mod, only: md_time, md_wait_sec, md_tadj_layers,          &
+    use molecular_diffusion_nlm_mod, only: md_time, md_wait_sec, md_tadj_layers,          &
                                        thermosphere_adjustment
 
     real, intent(IN) :: bdt  !< Large time-step
@@ -341,7 +341,7 @@ contains
       call ccpp_physics_timestep_init(cdata, suite_name=trim(ccpp_suite), group_name="fast_physics", ierr=ierr)
       ! Reset all interstitial variables for CCPP version
       ! of fast physics, and manually set runtime parameters
-      !call GFDL_interstitial%reset()
+      call GFDL_interstitial%reset()
       if (flagstruct%do_sat_adj) then
          GFDL_interstitial%out_dt = (idiag%id_mdt > 0)
       end if

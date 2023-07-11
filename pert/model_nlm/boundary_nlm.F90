@@ -36,15 +36,15 @@ module boundary_nlm_mod
 !     <td>constants_mod</td>
 !     <td>grav</td>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_nest_BC_type_3D, fv_grid_bounds_type</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng, isc,jsc,iec,jec, isd,jsd,ied,jed, is,js,ie,je, is_master, mp_bcst</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
@@ -61,7 +61,7 @@ module boundary_nlm_mod
 !   </tr>
 ! </table>
 
-  use fv_mp_mod,         only: is_master
+  use fv_mp_nlm_mod,         only: is_master
   use constants_mod,     only: grav
 
   use mpp_domains_mod,    only: mpp_get_compute_domain, mpp_get_data_domain, mpp_get_global_domain
@@ -70,10 +70,10 @@ module boundary_nlm_mod
   use mpp_domains_mod,    only: AGRID, BGRID_NE, CGRID_NE, DGRID_NE
   use mpp_mod,            only: mpp_error, FATAL, mpp_sum, mpp_sync, mpp_npes, mpp_broadcast, WARNING, mpp_pe
 
-  use fv_mp_mod,          only: mp_bcst
-  use fv_arrays_mod,      only: fv_atmos_type, fv_nest_BC_type_3D, fv_grid_bounds_type
+  use fv_mp_nlm_mod,          only: mp_bcst
+  use fv_arrays_nlm_mod,      only: fv_atmos_type, fv_nest_BC_type_3D, fv_grid_bounds_type
   use mpp_mod,            only: mpp_send, mpp_recv
-  use fv_timing_mod,      only: timing_on, timing_off
+  use fv_timing_nlm_mod,      only: timing_on, timing_off
   use mpp_domains_mod, only : nest_domain_type, WEST, SOUTH
   use mpp_domains_mod, only : mpp_get_C2F_index, mpp_update_nest_fine
   use mpp_domains_mod, only : mpp_get_F2C_index, mpp_update_nest_coarse

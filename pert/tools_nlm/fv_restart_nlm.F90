@@ -33,7 +33,7 @@ module fv_restart_nlm_mod
 !     <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>boundary_mod</td>
+!     <td>boundary_nlm_mod</td>
 !     <td>fill_nested_grid, nested_grid_BC, update_coarse_grid</td>
 !   </tr>
 !   <tr>
@@ -41,7 +41,7 @@ module fv_restart_nlm_mod
 !     <td>kappa, pi=>pi_8, omega, rdgas, grav, rvgas, cp_air, radius</td>
 !   </tr>
 !   <tr>
-!     <td>external_ic_mod</td>
+!     <td>external_ic_nlm_mod</td>
 !     <td>get_external_ic, get_cubed_sphere_terrain</td>
 !   </tr>
 !   <tr>
@@ -53,55 +53,55 @@ module fv_restart_nlm_mod
 !     <td>file_exist</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_nest_type, fv_grid_bounds_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_control_mod</td>
+!     <td>fv_control_nlm_mod</td>
 !     <td>fv_init, fv_end, ngrids</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>prt_maxmin</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>compute_dz_var, compute_dz_L32, set_hybrid_z</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>ptop_min, fill_ghost, g_sum,
 !         make_eta_level, cubed_to_latlon, great_circle_dist</td>
 !   </tr>
 !   <tr>
-!     <td>fv_io_mod</td>
+!     <td>fv_io_nlm_mod</td>
 !     <td>fv_io_init, fv_io_read_restart, fv_io_write_restart,
 !        remap_restart, fv_io_register_restart, fv_io_register_nudge_restart,
 !        fv_io_register_restart_BCs, fv_io_register_restart_BCs_NH, fv_io_write_BCs,
 !        fv_io_read_BCs</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is_master, switch_current_Atm, mp_reduce_min, mp_reduce_max</td>
 !   </tr>
 !   <tr>
-!     <td>fv_surf_map_mod</td>
+!     <td>fv_surf_map_nlm_mod</td>
 !     <td>sgh_g, oro_g,del2_cubed_sphere, del4_cubed_sphere </td>
 !   </tr>
 !   <tr>
-!     <td>fv_treat_da_inc_mod</td>
+!     <td>fv_treat_da_inc_nlm_mod</td>
 !     <td>read_da_inc</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
-!     <td>fv_update_phys_mod</td>
+!     <td>fv_update_phys_nlm_mod</td>
 !     <td>fv_update_phys</td>
 !   </tr>
 !   <tr>
-!     <td>init_hydro_mod</td>
+!     <td>init_hydro_nlm_mod</td>
 !     <td>p_var</td>
 !   </tr>
 !   <tr>
@@ -129,7 +129,7 @@ module fv_restart_nlm_mod
 !     <td>get_tracer_index, get_tracer_names</td>
 !   </tr>
 !   <tr>
-!     <td>test_cases_mod</td>
+!     <td>test_cases_nlm_mod</td>
 !     <td>test_case, alpha, init_case, init_double_periodic, init_latlon</td>
 !   </tr>
 ! </table>
@@ -140,39 +140,39 @@ module fv_restart_nlm_mod
 
   use constants_mod,       only: kappa, pi=>pi_8, omega, rdgas, grav, rvgas, cp_air, radius
 
-  use fv_arrays_mod,       only: fv_atmos_type, fv_nest_type, fv_grid_bounds_type, R_GRID
-  use fv_io_mod,           only: fv_io_init, fv_io_read_restart, fv_io_write_restart, &
+  use fv_arrays_nlm_mod,       only: fv_atmos_type, fv_nest_type, fv_grid_bounds_type, R_GRID
+  use fv_io_nlm_mod,           only: fv_io_init, fv_io_read_restart, fv_io_write_restart, &
                                  remap_restart, fv_io_register_nudge_restart, &
                                  fv_io_register_restart_BCs, fv_io_write_BCs, fv_io_read_BCs
-  use fv_grid_utils_mod,   only: ptop_min, fill_ghost, g_sum, &
+  use fv_grid_utils_nlm_mod,   only: ptop_min, fill_ghost, g_sum, &
                                  make_eta_level, cubed_to_latlon, great_circle_dist
-  use fv_diagnostics_mod,  only: prt_maxmin
-  use init_hydro_mod,      only: p_var
+  use fv_diagnostics_nlm_mod,  only: prt_maxmin
+  use init_hydro_nlm_mod,      only: p_var
   use mpp_domains_mod,     only: mpp_update_domains, domain2d, DGRID_NE
   use mpp_mod,             only: mpp_chksum, stdout, mpp_error, FATAL, NOTE
   use mpp_mod,             only: get_unit, mpp_sum, mpp_broadcast, mpp_max, mpp_npes
   use mpp_mod,             only: mpp_get_current_pelist, mpp_npes, mpp_set_current_pelist
-  use test_cases_mod,      only: alpha, init_case, init_double_periodic!, init_latlon
-  use fv_mp_mod,           only: is_master, mp_reduce_min, mp_reduce_max, corners_YDir => YDir, fill_corners, tile_fine, global_nest_domain
-  use fv_surf_map_mod,     only: sgh_g, oro_g
+  use test_cases_nlm_mod,      only: alpha, init_case, init_double_periodic!, init_latlon
+  use fv_mp_nlm_mod,           only: is_master, mp_reduce_min, mp_reduce_max, corners_YDir => YDir, fill_corners, tile_fine, global_nest_domain
+  use fv_surf_map_nlm_mod,     only: sgh_g, oro_g
   use tracer_manager_mod,  only: get_tracer_names
   use field_manager_mod,   only: MODEL_ATMOS
-  use external_ic_mod,     only: get_external_ic
-  use fv_eta_mod,          only: compute_dz_var, compute_dz_L32, set_hybrid_z
-  use fv_surf_map_mod,     only: del2_cubed_sphere, del4_cubed_sphere
-  use boundary_mod,        only: fill_nested_grid, nested_grid_BC, update_coarse_grid
+  use external_ic_nlm_mod,     only: get_external_ic
+  use fv_eta_nlm_mod,          only: compute_dz_var, compute_dz_L32, set_hybrid_z
+  use fv_surf_map_nlm_mod,     only: del2_cubed_sphere, del4_cubed_sphere
+  use boundary_nlm_mod,        only: fill_nested_grid, nested_grid_BC, update_coarse_grid
   use tracer_manager_mod,  only: get_tracer_index
   use field_manager_mod,   only: MODEL_ATMOS
-  use fv_timing_mod,       only: timing_on, timing_off
+  use fv_timing_nlm_mod,       only: timing_on, timing_off
   use mpp_domains_mod,     only: mpp_get_compute_domain, mpp_get_data_domain, mpp_get_global_domain
   use mpp_mod,             only: mpp_send, mpp_recv, mpp_sync_self, mpp_set_current_pelist, mpp_get_current_pelist, mpp_npes, mpp_pe, mpp_sync
   use mpp_domains_mod,     only: CENTER, CORNER, NORTH, EAST,  mpp_get_C2F_index, WEST, SOUTH
   use mpp_domains_mod,     only: mpp_global_field
-  use fv_treat_da_inc_mod, only: read_da_inc
+  use fv_treat_da_inc_nlm_mod, only: read_da_inc
   use fms2_io_mod,         only: file_exists, set_filename_appendix, FmsNetcdfFile_t, open_file, close_file
   use fms_io_mod,          only: fmsset_filename_appendix=> set_filename_appendix
-  use coarse_grained_restart_files_mod, only: fv_io_write_restart_coarse
-  use fv_regional_mod,     only: write_full_fields
+  use coarse_grained_restart_files_nlm_mod, only: fv_io_write_restart_coarse
+  use fv_regional_nlm_mod,     only: write_full_fields
 
 
 
@@ -285,7 +285,7 @@ contains
        endif
 
        !2. Register restarts
-       !No longer need to register restarts in fv_restart_mod with fms2_io implementation
+       !No longer need to register restarts in fv_restart_nlm_mod with fms2_io implementation
 
        ! The two calls are needed until everything uses fms2io
        if (Atm(n)%neststruct%nested .and. n==this_grid) then

@@ -41,12 +41,12 @@ module molecular_diffusion_nlm_mod
 ! </table>
 
       use constants_mod,      only: rdgas, cp_air
-      use fv_mp_mod,          only: is_master
+      use fv_mp_nlm_mod,          only: is_master
       use mpp_mod,            only: stdlog, input_nml_file
       use fms_mod,            only: check_nml_error, open_namelist_file, close_file
-      use fv_grid_utils_mod,  only: g_sum
+      use fv_grid_utils_nlm_mod,  only: g_sum
       use mpp_domains_mod,    only: domain2d
-      use fv_arrays_mod,      only: fv_grid_type, fv_grid_bounds_type
+      use fv_arrays_nlm_mod,      only: fv_grid_type, fv_grid_bounds_type
 
 
 

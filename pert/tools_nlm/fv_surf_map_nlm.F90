@@ -37,20 +37,20 @@
 !         stdlog, mpp_pe, mpp_root_pe, FATAL, error_mesg</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_bounds_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>great_circle_dist, latlon2xyz, v_prod, normalize_vect,
 !         g_sum, global_mx, vect_cross</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng,mp_stop, mp_reduce_min, mp_reduce_max, is_master</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
@@ -71,11 +71,11 @@
       use mpp_domains_mod,   only: mpp_update_domains, domain2d
       use constants_mod,     only: grav, radius, pi=>pi_8
 
-      use fv_grid_utils_mod, only: great_circle_dist, latlon2xyz, v_prod, normalize_vect
-      use fv_grid_utils_mod, only: g_sum, global_mx, vect_cross
-      use fv_mp_mod,         only: mp_stop, mp_reduce_min, mp_reduce_max, is_master
-      use fv_timing_mod,     only: timing_on, timing_off
-      use fv_arrays_mod,     only: fv_grid_bounds_type, R_GRID
+      use fv_grid_utils_nlm_mod, only: great_circle_dist, latlon2xyz, v_prod, normalize_vect
+      use fv_grid_utils_nlm_mod, only: g_sum, global_mx, vect_cross
+      use fv_mp_nlm_mod,         only: mp_stop, mp_reduce_min, mp_reduce_max, is_master
+      use fv_timing_nlm_mod,     only: timing_on, timing_off
+      use fv_arrays_nlm_mod,     only: fv_grid_bounds_type, R_GRID
 
       implicit none
 

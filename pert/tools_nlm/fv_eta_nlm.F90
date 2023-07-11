@@ -36,7 +36,7 @@ module fv_eta_nlm_mod
 !     <td>kappa, grav, cp_air, rdgas</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is_master</td>
 !   </tr>
 !   <tr>
@@ -46,7 +46,7 @@ module fv_eta_nlm_mod
 ! </table>
 
  use constants_mod,  only: kappa, grav, cp_air, rdgas
- use fv_mp_mod,      only: is_master
+ use fv_mp_nlm_mod,      only: is_master
  use fms_mod,        only: FATAL, error_mesg
  use fms2_io_mod,    only: ascii_read
  implicit none
@@ -1016,7 +1016,7 @@ module fv_eta_nlm_mod
    real, intent(out):: ptop         ! model top (Pa)
    character(24), intent(IN) :: npz_type
    character(120), intent(IN) :: fv_eta_file
-   !character(len=:), dimension(:), allocatable :: eta_level_unit
+   character(len=:), dimension(:), allocatable :: eta_level_unit
 
    real:: p0=1000.E2
    real:: pc=200.E2
@@ -1073,27 +1073,27 @@ module fv_eta_nlm_mod
          auto_routine = 2
       end select
 
-!   else if (trim(npz_type) == 'input') then
-!! Jili Dong add ak/bk input
-!       call ascii_read (trim(fv_eta_file), eta_level_unit)
-!       !--- fv_eta_file being read in must have the following format:
-!       !       include a single line description
-!       !       ak/bk pairs, with each pair occupying a single line
-!       !       the pairs must be ordered from surface to TOA
-!       !       the pairs define the levels of the grid to create levels-1 layers
-!       if (size(eta_level_unit(:)) /= km+2) then
-!          print *,' size is ', size(eta_level_unit(:))
-!          call error_mesg ('FV3 set_eta',trim(fv_eta_file)//" has too few or too many entries or has extra &
-!                          &spaces at the end of the file", FATAL)
-!       endif
-!       l = 1
-!       read(eta_level_unit(l),*)
-!       do k=km+1,1,-1
-!          l = l + 1
-!          read(eta_level_unit(l),*) ak(k),bk(k)
-!       end do
-!       deallocate (eta_level_unit)
-!       call set_external_eta(ak, bk, ptop, ks)
+   else if (trim(npz_type) == 'input') then
+! Jili Dong add ak/bk input
+       call ascii_read (trim(fv_eta_file), eta_level_unit)
+       !--- fv_eta_file being read in must have the following format:
+       !       include a single line description
+       !       ak/bk pairs, with each pair occupying a single line
+       !       the pairs must be ordered from surface to TOA
+       !       the pairs define the levels of the grid to create levels-1 layers
+       if (size(eta_level_unit(:)) /= km+2) then
+          print *,' size is ', size(eta_level_unit(:))
+          call error_mesg ('FV3 set_eta',trim(fv_eta_file)//" has too few or too many entries or has extra &
+                          &spaces at the end of the file", FATAL)
+       endif
+       l = 1
+       read(eta_level_unit(l),*)
+       do k=km+1,1,-1
+          l = l + 1
+          read(eta_level_unit(l),*) ak(k),bk(k)
+       end do
+       deallocate (eta_level_unit)
+       call set_external_eta(ak, bk, ptop, ks)
    else
 
       select case (km)

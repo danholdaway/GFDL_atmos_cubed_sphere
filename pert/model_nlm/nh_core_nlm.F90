@@ -37,12 +37,12 @@ module nh_core_nlm_mod
 !     <td>rdgas, cp_air, grav</td>
 !   </tr>
 !   <tr>
-!     <td>nh_utils_mod</td>
+!     <td>nh_utils_nlm_mod</td>
 !     <td>update_dz_c, update_dz_d, nest_halo_nh, sim3p0_solver, rim_2d,
 !         sim_solver, sim1_solver, sim3_solver</td>
 !   </tr>
 !   <tr>
-!     <td>tp_core_mod</td>
+!     <td>tp_core_nlm_mod</td>
 !     <td>fv_tp_2d</td>
 !   </tr>
 ! </table>
@@ -52,11 +52,11 @@ module nh_core_nlm_mod
 
    use constants_mod,     only: rdgas, cp_air, grav
 
-   use tp_core_mod,       only: fv_tp_2d
-   use nh_utils_mod,      only: update_dz_c, update_dz_d, nh_bc
-   use nh_utils_mod,      only: sim_solver, sim1_solver, sim3_solver
-   use nh_utils_mod,      only: sim3p0_solver, rim_2d
-   use nh_utils_mod,      only: Riem_Solver_c
+   use tp_core_nlm_mod,       only: fv_tp_2d
+   use nh_utils_nlm_mod,      only: update_dz_c, update_dz_d, nh_bc
+   use nh_utils_nlm_mod,      only: sim_solver, sim1_solver, sim3_solver
+   use nh_utils_nlm_mod,      only: sim3p0_solver, rim_2d
+   use nh_utils_nlm_mod,      only: Riem_Solver_c
 
    implicit none
    private

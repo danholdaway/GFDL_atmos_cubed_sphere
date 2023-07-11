@@ -34,7 +34,7 @@ module fv_update_phys_nlm_mod
 !     <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>boundary_mod</td>
+!     <td>boundary_nlm_mod</td>
 !     <td>nested_grid_BC, extrapolation_BC</td>
 !   </tr>
 !   <tr>
@@ -46,27 +46,27 @@ module fv_update_phys_nlm_mod
 !     <td>MODEL_ATMOS</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_flags_type, fv_nest_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>prt_maxmin</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>get_eta_level</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mapz_mod</td>
+!     <td>fv_mapz_nlm_mod</td>
 !     <td>moist_cv, moist_cp</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>start_group_halo_update, complete_group_halo_update,group_halo_update_type</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
@@ -103,15 +103,15 @@ module fv_update_phys_nlm_mod
   use mpp_mod,            only: mpp_error, NOTE, WARNING, mpp_pe
   use time_manager_mod,   only: time_type
   use tracer_manager_mod, only: get_tracer_index, adjust_mass, get_tracer_names
-  use fv_mp_mod,          only: start_group_halo_update, complete_group_halo_update
-  use fv_mp_mod,          only: group_halo_update_type
-  use fv_arrays_mod,      only: fv_flags_type, fv_nest_type, R_GRID, phys_diag_type, nudge_diag_type
-  use boundary_mod,       only: nested_grid_BC
-  use boundary_mod,       only: extrapolation_BC
-  use fv_eta_mod,         only: get_eta_level
-  use fv_timing_mod,      only: timing_on, timing_off
-  use fv_diagnostics_mod, only: prt_maxmin, range_check
-  use fv_mapz_mod,        only: moist_cv, moist_cp
+  use fv_mp_nlm_mod,          only: start_group_halo_update, complete_group_halo_update
+  use fv_mp_nlm_mod,          only: group_halo_update_type
+  use fv_arrays_nlm_mod,      only: fv_flags_type, fv_nest_type, R_GRID, phys_diag_type, nudge_diag_type
+  use boundary_nlm_mod,       only: nested_grid_BC
+  use boundary_nlm_mod,       only: extrapolation_BC
+  use fv_eta_nlm_mod,         only: get_eta_level
+  use fv_timing_nlm_mod,      only: timing_on, timing_off
+  use fv_diagnostics_nlm_mod, only: prt_maxmin, range_check
+  use fv_mapz_nlm_mod,        only: moist_cv, moist_cp
 
 
 
@@ -119,11 +119,11 @@ module fv_update_phys_nlm_mod
 
 
 
-  use fv_nwp_nudge_mod,   only: fv_nwp_nudge
+  use fv_nwp_nudge_nlm_mod,   only: fv_nwp_nudge
 
-  use fv_arrays_mod,      only: fv_grid_type, fv_nest_type, fv_grid_bounds_type
-  use fv_grid_utils_mod,  only: cubed_to_latlon, update_dwinds_phys, update2d_dwinds_phys
-  use fv_nesting_mod,     only: set_physics_BCs
+  use fv_arrays_nlm_mod,      only: fv_grid_type, fv_nest_type, fv_grid_bounds_type
+  use fv_grid_utils_nlm_mod,  only: cubed_to_latlon, update_dwinds_phys, update2d_dwinds_phys
+  use fv_nesting_nlm_mod,     only: set_physics_BCs
   use sat_vapor_pres_mod, only: tcmin, tcmax
 
 

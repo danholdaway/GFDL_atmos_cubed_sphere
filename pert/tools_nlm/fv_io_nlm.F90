@@ -37,7 +37,7 @@ module fv_io_nlm_mod
 !     <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>external_sst_mod</td>
+!     <td>external_sst_nlm_mod</td>
 !     <td>sst_ncep, sst_anom, use_ncep_sst</td>
 !   </tr>
 !   <tr>
@@ -58,15 +58,15 @@ module fv_io_nlm_mod
 !         free_restart_type,field_exist</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_nest_BC_type_3D</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>set_external_eta</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng, mp_gather, is_master</td>
 !   </tr>
 !   <tr>
@@ -106,12 +106,12 @@ module fv_io_nlm_mod
                                      set_tracer_profile, &
                                      get_tracer_index
   use field_manager_mod,       only: MODEL_ATMOS
-  use external_sst_mod,        only: sst_ncep, sst_anom, use_ncep_sst
-  use fv_arrays_mod,           only: fv_atmos_type, fv_nest_BC_type_3D
-  use fv_eta_mod,              only: set_external_eta
+  use external_sst_nlm_mod,        only: sst_ncep, sst_anom, use_ncep_sst
+  use fv_arrays_nlm_mod,           only: fv_atmos_type, fv_nest_BC_type_3D
+  use fv_eta_nlm_mod,              only: set_external_eta
 
-  use fv_mp_mod,               only: mp_gather, is_master
-  use fv_treat_da_inc_mod,     only: read_da_inc
+  use fv_mp_nlm_mod,               only: mp_gather, is_master
+  use fv_treat_da_inc_nlm_mod,     only: read_da_inc
 
   implicit none
   private
@@ -536,7 +536,7 @@ contains
   !! to a new set of Eulerian coordinates.
   !>@details Use if npz (run time z-dimension) /= npz_rst (restart z-dimension)
   subroutine  remap_restart(Atm)
-  use fv_mapz_mod,       only: rst_remap
+  use fv_mapz_nlm_mod,       only: rst_remap
 
     type(fv_atmos_type), intent(inout) :: Atm(:)
 

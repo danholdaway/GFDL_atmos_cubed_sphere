@@ -42,7 +42,7 @@ module multi_gases_nlm_mod
 !* R_n2+= 295.3892, R_h2o= 461.50, R_o3=173.2247, R_o= 519.674, R_o2=259.8370
 !* Cpn2+=1031.1083, Cph2o=1846.00, Cpo3=820.2391, Cpo=1299.185, Cpo2=918.0969
       use constants_mod,     only: rdgas, rvgas, cp_air
-      use     fv_mp_mod,     only: is_master
+      use     fv_mp_nlm_mod,     only: is_master
       use mpp_mod,           only: stdlog, input_nml_file
       use fms_mod,           only: check_nml_error, open_namelist_file, close_file
 

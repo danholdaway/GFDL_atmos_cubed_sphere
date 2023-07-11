@@ -2,15 +2,15 @@
 
 module fv_diag_column_nlm_mod
 
-  use fv_arrays_mod,      only: fv_atmos_type, fv_grid_type, fv_diag_type, fv_grid_bounds_type, &
+  use fv_arrays_nlm_mod,      only: fv_atmos_type, fv_grid_type, fv_diag_type, fv_grid_bounds_type, &
                                 R_GRID
-  use fv_grid_utils_mod,  only: great_circle_dist
+  use fv_grid_utils_nlm_mod,  only: great_circle_dist
   use time_manager_mod,   only: time_type, get_date, get_time, month_name
   use constants_mod,      only: grav, rdgas, kappa, cp_air, TFREEZE, pi=>pi_8
   use fms_mod,            only: write_version_number, lowercase
   use mpp_mod,            only: mpp_error, FATAL, stdlog, mpp_pe, mpp_root_pe, mpp_sum, &
                                 mpp_max, NOTE, input_nml_file, get_unit
-  use fv_sg_mod,          only: qsmith
+  use fv_sg_nlm_mod,          only: qsmith
 
   implicit none
   private
@@ -82,7 +82,7 @@ contains
    integer :: ios, nlunit
    logical :: exists
 
-   call write_version_number ( 'FV_DIAG_COLUMN_MOD', version )
+   call write_version_number ( 'fv_diag_column_nlm_mod', version )
 
     diag_debug_names(:) = ''
     diag_debug_lon(:) = -999.

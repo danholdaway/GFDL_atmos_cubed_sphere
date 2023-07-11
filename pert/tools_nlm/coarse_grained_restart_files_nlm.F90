@@ -2,7 +2,7 @@
 
 module coarse_grained_restart_files_nlm_mod
 
-  use coarse_graining_mod, only: compute_mass_weights, get_coarse_array_bounds,&
+  use coarse_graining_nlm_mod, only: compute_mass_weights, get_coarse_array_bounds,&
        get_fine_array_bounds, MODEL_LEVEL, PRESSURE_LEVEL, weighted_block_average, &
        weighted_block_edge_average_x, weighted_block_edge_average_y, &
        mask_area_weights, mask_mass_weights, block_upsample, remap_edges_along_x, &
@@ -10,11 +10,11 @@ module coarse_grained_restart_files_nlm_mod
   use constants_mod, only: GRAV, RDGAS, RVGAS
   use field_manager_mod, only: MODEL_ATMOS
   use fms2_io_mod,      only: register_restart_field, write_restart, open_file, close_file
-  use fv_arrays_mod, only: coarse_restart_type, fv_atmos_type
+  use fv_arrays_nlm_mod, only: coarse_restart_type, fv_atmos_type
   use mpp_domains_mod, only: domain2d, EAST, NORTH, CENTER, mpp_update_domains
   use mpp_mod, only: FATAL, mpp_error
   use tracer_manager_mod, only: get_tracer_names, get_tracer_index, set_tracer_profile
-  use fv_io_mod, only: fv_io_register_axis
+  use fv_io_nlm_mod, only: fv_io_register_axis
 
   implicit none
   private

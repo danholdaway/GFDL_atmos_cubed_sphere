@@ -33,15 +33,15 @@ module tp_core_nlm_mod
 !    <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>big_number</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, fv_grid_bounds_type</td>
 !   </tr>
 !   <tr>
@@ -51,8 +51,8 @@ module tp_core_nlm_mod
 !   </tr>
 ! </table>
 
- use fv_grid_utils_mod, only: big_number
- use fv_arrays_mod,     only: fv_grid_type, fv_grid_bounds_type
+ use fv_grid_utils_nlm_mod, only: big_number
+ use fv_arrays_nlm_mod,     only: fv_grid_type, fv_grid_bounds_type
 
  implicit none
 

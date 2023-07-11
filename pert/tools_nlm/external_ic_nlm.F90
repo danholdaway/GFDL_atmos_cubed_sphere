@@ -27,7 +27,7 @@
 
 
 
-!>@brief The module 'external_ic_mod' contains routines that read in and
+!>@brief The module 'external_ic_nlm_mod' contains routines that read in and
 !! remap initial conditions.
 
 module external_ic_nlm_mod
@@ -42,7 +42,7 @@ module external_ic_nlm_mod
 !     <td>pi=>pi_8, omega, grav, kappa, rdgas, rvgas, cp_air</td>
 !   </tr>
 !   <tr>
-!     <td>external_sst_mod</td>
+!     <td>external_sst_nlm_mod</td>
 !     <td>i_sst, j_sst, sst_ncep</td>
 !   </tr>
 !   <tr>
@@ -62,60 +62,60 @@ module external_ic_nlm_mod
 !         get_variable_dimension_names, get_variable_num_dimensions</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_grid_type, fv_grid_bounds_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_control_mod</td>
+!     <td>fv_control_nlm_mod</td>
 !     <td>fv_init, fv_end, ngrids</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>prt_maxmin, prt_gb_nh_sh, prt_height</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>set_eta, set_external_eta</td>
 !   </tr>
 !   <tr>
-!     <td>fv_fill_mod</td>
+!     <td>fv_fill_nlm_mod</td>
 !     <td>fillz</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>ptop_min, g_sum,mid_pt_sphere,get_unit_vect2,
 !         get_latlon_vector,inner_prod</td>
 !   </tr>
 !   <tr>
-!     <td>fv_io_mod</td>
+!     <td>fv_io_nlm_mod</td>
 !     <td>fv_io_read_tracers</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng, is_master, fill_corners, YDir, mp_reduce_min, mp_reduce_max</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mapz_mod</td>
+!     <td>fv_mapz_nlm_mod</td>
 !     <td>mappm</td>
 !   </tr>
 !   <tr>
-!     <td>fv_nwp_nudge_mod</td>
+!     <td>fv_nwp_nudge_nlm_mod</td>
 !     <td>T_is_Tv</td>
 !   </tr>
 !   <tr>
-!     <td>fv_surf_map_mod</td>
+!     <td>fv_surf_map_nlm_mod</td>
 !     <td>surfdrv, FV3_zs_filter,sgh_g, oro_g,del2_cubed_sphere, del4_cubed_sphere</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
-!     <td>fv_update_phys_mod</td>
+!     <td>fv_update_phys_nlm_mod</td>
 !     <td>fv_update_phys</td>
 !   </tr>
 !   <tr>
-!     <td>init_hydro_mod</td>
+!     <td>init_hydro_nlm_mod</td>
 !     <td>p_var</td>
 !   </tr>
 !   <tr>
@@ -131,7 +131,7 @@ module external_ic_nlm_mod
 !     <td>AGRID_PARAM=>AGRID</td>
 !   </tr>
 !   <tr>
-!     <td>sim_nc_mod</td>
+!     <td>sim_nc_nlm_mod</td>
 !     <td>open_ncfile, close_ncfile, get_ncdim1, get_var1_double, get_var2_real,
 !         get_var3_r4, get_var2_r4, get_var1_real, get_var_att_double</td>
 !   </tr>
@@ -140,13 +140,13 @@ module external_ic_nlm_mod
 !     <td>get_tracer_names, get_number_tracers, get_tracer_index, set_tracer_profile</td>
 !   </tr>
 !   <tr>
-!     <td>test_cases_mod</td>
+!     <td>test_cases_nlm_mod</td>
 !     <td>checker_tracers</td>
 !   </tr>
 ! </table>
 
    use netcdf
-   use external_sst_mod,   only: i_sst, j_sst, sst_ncep
+   use external_sst_nlm_mod,   only: i_sst, j_sst, sst_ncep
    use fms_mod,            only: write_version_number, check_nml_error
    use fms2_io_mod,        only: file_exists, open_file, close_file, read_data, variable_exists, &
                                  get_variable_size, get_global_attribute, global_att_exists, &
@@ -166,30 +166,30 @@ module external_ic_nlm_mod
 
    use constants_mod,     only: pi=>pi_8, omega, grav, kappa, rdgas, rvgas, cp_air
 
-   use fv_arrays_mod,     only: fv_atmos_type, fv_grid_type, fv_grid_bounds_type, R_GRID
-   use fv_diagnostics_mod,only: prt_maxmin, prt_gb_nh_sh, prt_height
-   use fv_grid_utils_mod, only: ptop_min, g_sum,mid_pt_sphere,get_unit_vect2,get_latlon_vector,inner_prod
-   use fv_io_mod,         only: fv_io_read_tracers
-   use fv_mapz_mod,       only: mappm
-   use fv_regional_mod,   only: dump_field, H_STAGGER, U_STAGGER, V_STAGGER, get_data_source
-   use fv_mp_mod,         only: is_master, fill_corners, YDir, mp_reduce_min, mp_reduce_max
-   use fv_regional_mod,   only: start_regional_cold_start
-   use fv_surf_map_mod,   only: surfdrv, FV3_zs_filter
-   use fv_surf_map_mod,   only: sgh_g, oro_g
-   use fv_surf_map_mod,   only: del2_cubed_sphere, del4_cubed_sphere
-   use fv_timing_mod,     only: timing_on, timing_off
-   use init_hydro_mod,    only: p_var
-   use fv_fill_mod,       only: fillz
-   use fv_eta_mod,        only: set_eta, set_external_eta
-   use sim_nc_mod,        only: open_ncfile, close_ncfile, get_ncdim1, get_var1_double, get_var2_real,   &
+   use fv_arrays_nlm_mod,     only: fv_atmos_type, fv_grid_type, fv_grid_bounds_type, R_GRID
+   use fv_diagnostics_nlm_mod,only: prt_maxmin, prt_gb_nh_sh, prt_height
+   use fv_grid_utils_nlm_mod, only: ptop_min, g_sum,mid_pt_sphere,get_unit_vect2,get_latlon_vector,inner_prod
+   use fv_io_nlm_mod,         only: fv_io_read_tracers
+   use fv_mapz_nlm_mod,       only: mappm
+   use fv_regional_nlm_mod,   only: dump_field, H_STAGGER, U_STAGGER, V_STAGGER, get_data_source
+   use fv_mp_nlm_mod,         only: is_master, fill_corners, YDir, mp_reduce_min, mp_reduce_max
+   use fv_regional_nlm_mod,   only: start_regional_cold_start
+   use fv_surf_map_nlm_mod,   only: surfdrv, FV3_zs_filter
+   use fv_surf_map_nlm_mod,   only: sgh_g, oro_g
+   use fv_surf_map_nlm_mod,   only: del2_cubed_sphere, del4_cubed_sphere
+   use fv_timing_nlm_mod,     only: timing_on, timing_off
+   use init_hydro_nlm_mod,    only: p_var
+   use fv_fill_nlm_mod,       only: fillz
+   use fv_eta_nlm_mod,        only: set_eta, set_external_eta
+   use sim_nc_nlm_mod,        only: open_ncfile, close_ncfile, get_ncdim1, get_var1_double, get_var2_real,   &
                                 get_var3_r4, get_var2_r4, get_var1_real, get_var_att_double
-   use fv_nwp_nudge_mod,  only: T_is_Tv
-   use test_cases_mod,    only: checker_tracers
+   use fv_nwp_nudge_nlm_mod,  only: T_is_Tv
+   use test_cases_nlm_mod,    only: checker_tracers
 
 ! The "T" field in NCEP analysis is actually virtual temperature (Larry H. post processing)
 ! BEFORE 20051201
 
-   use boundary_mod,      only: nested_grid_BC, extrapolation_BC
+   use boundary_nlm_mod,      only: nested_grid_BC, extrapolation_BC
    use mpp_domains_mod,       only: mpp_get_data_domain, mpp_get_global_domain, mpp_get_compute_domain
 
 
@@ -508,7 +508,7 @@ contains
     ierr = check_nml_error(ios,'external_ic_nml')
 
     unit = stdlog()
-    call write_version_number ( 'EXTERNAL_IC_MOD::get_nggps_ic', version )
+    call write_version_number ( 'external_ic_nlm_mod::get_nggps_ic', version )
     write(unit, nml=external_ic_nml)
 
     remap = .true.
@@ -1039,7 +1039,7 @@ contains
       ierr = check_nml_error(ios,'external_ic_nml')
 
       unit = stdlog()
-      call write_version_number ( 'EXTERNAL_IC_MOD::get_hrrr_ic', version )
+      call write_version_number ( 'external_ic_nlm_mod::get_hrrr_ic', version )
       write(unit, nml=external_ic_nml)
 
       remap = .true.
@@ -1619,7 +1619,7 @@ contains
 ! Perform interp to FMS SST format/grid
         call ncep2fms(im, jm, lon, lat, wk2)
         if( is_master() ) then
-          write(*,*) 'External_ic_mod: i_sst=', i_sst, ' j_sst=', j_sst
+          write(*,*) 'external_ic_nlm_mod: i_sst=', i_sst, ' j_sst=', j_sst
           call pmaxmin( 'SST_ncep_fms',  real(sst_ncep), i_sst, j_sst, 1.)
         endif
       endif  !(read_ts)

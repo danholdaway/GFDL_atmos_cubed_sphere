@@ -34,25 +34,25 @@
 !     <th>Functions Included</th>
 !  </tr>
 !   <tr>
-!     <td>a2b_edge_mod</td>
+!     <td>a2b_edge_nlm_mod</td>
 !     <td>a2b_ord4</td>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>ffv_grid_type, fv_grid_bounds_type, fv_flags_type</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>fill_corners, XDir, YDir</td>
 !   </tr>
 ! </table>
 
- use molecular_diffusion_mod,  only: molecular_diffusion_coefs, &
+ use molecular_diffusion_nlm_mod,  only: molecular_diffusion_coefs, &
                                      tau_visc, tau_cond, tau_diff
- use tp_core_mod,       only: fv_tp_2d, pert_ppm, copy_corners,    &
+ use tp_core_nlm_mod,       only: fv_tp_2d, pert_ppm, copy_corners,    &
                               deln_flux_explm, deln_flux_explm_udvd
- use fv_mp_mod, only: is_master, fill_corners, XDir, YDir
- use fv_arrays_mod, only: fv_grid_type, fv_grid_bounds_type, fv_flags_type
- use a2b_edge_mod, only: a2b_ord4
+ use fv_mp_nlm_mod, only: is_master, fill_corners, XDir, YDir
+ use fv_arrays_nlm_mod, only: fv_grid_type, fv_grid_bounds_type, fv_flags_type
+ use a2b_edge_nlm_mod, only: a2b_ord4
 
 
 

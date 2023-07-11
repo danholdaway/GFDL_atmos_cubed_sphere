@@ -29,7 +29,7 @@
 !! around a b-grid cell with no ghosting.
 module sorted_index_nlm_mod
 
-  use fv_arrays_mod, only: R_GRID
+  use fv_arrays_nlm_mod, only: R_GRID
 
   implicit none
   private

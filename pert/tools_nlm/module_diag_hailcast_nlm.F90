@@ -12,7 +12,7 @@ MODULE module_diag_hailcast_nlm
     USE time_manager_mod, ONLY: time_type, get_time
     use mpp_mod,          only: mpp_pe, mpp_root_pe, mpp_error, FATAL   !, input_nml_file, stdlog
     !use fms_mod,          only: check_nml_error
-    !use fv_mp_mod,        only: is_master
+    !use fv_mp_nlm_mod,        only: is_master
 
     use constants_mod,    only: grav, rdgas
 
@@ -191,7 +191,7 @@ CONTAINS
            isco,jsco,ieco,jeco,isdo,iedo,jsdo,jedo,npzo, Time_step_atmos, avg_max_length)
 
         !moved this code from subroutine fv_nggps_tavg(Atm, Time_step_atmos,avg_max_length,zvir) in fv_nggps_diag
-        use fv_arrays_mod,      only: fv_atmos_type
+        use fv_arrays_nlm_mod,      only: fv_atmos_type
         type(fv_atmos_type), intent(inout) :: Atm
         type(time_type),     intent(in)    :: Time_step_atmos
         real,    INTENT(IN) :: avg_max_length

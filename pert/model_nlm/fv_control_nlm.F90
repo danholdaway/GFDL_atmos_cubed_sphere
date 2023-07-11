@@ -49,41 +49,41 @@ module fv_control_nlm_mod
 !         check_nml_error, close_file, file_exist</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, allocate_fv_atmos_type, deallocate_fv_atmos_type,
 !          R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>fv_diag_init_gn</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>set_eta</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_tools_mod</td>
+!     <td>fv_grid_tools_nlm_mod</td>
 !     <td>init_grid</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>grid_utils_init, grid_utils_end, ptop_min</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>mp_start, mp_assign_gid, domain_decomp,ng, switch_current_Atm,
 !         broadcast_domains, mp_barrier, is_master, setup_master </td>
 !   </tr>
 !   <tr>
-!     <td>fv_io_mod</td>
+!     <td>fv_io_nlm_mod</td>
 !     <td>fv_io_exit</td>
 !   </tr>
 !   <tr>
-!     <td>fv_restart_mod</td>
+!     <td>fv_restart_nlm_mod</td>
 !     <td>fv_restart_init, fv_restart_end</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off, timing_init, timing_prt</td>
 !   </tr>
 !   <tr>
@@ -104,7 +104,7 @@ module fv_control_nlm_mod
 !     <td>AGRID_PARAM=>AGRID</td>
 !   </tr>
 !   <tr>
-!     <td>test_cases_mod</td>
+!     <td>test_cases_nlm_mod</td>
 !     <td>test_case, bubble_do, alpha, nsolitons, soliton_Umax, soliton_size</td>
 !   </tr>
 !   <tr>
@@ -133,18 +133,18 @@ module fv_control_nlm_mod
                                   tm_check_if_prognostic=> check_if_prognostic,&
                                   tm_register_tracers   => register_tracers
 
-   use fv_io_mod,           only: fv_io_exit
-   use fv_restart_mod,      only: fv_restart_init, fv_restart_end
-   use fv_arrays_mod,       only: fv_atmos_type, allocate_fv_atmos_type, deallocate_fv_atmos_type, &
+   use fv_io_nlm_mod,           only: fv_io_exit
+   use fv_restart_nlm_mod,      only: fv_restart_init, fv_restart_end
+   use fv_arrays_nlm_mod,       only: fv_atmos_type, allocate_fv_atmos_type, deallocate_fv_atmos_type, &
                                   R_GRID
-   use fv_grid_utils_mod,   only: grid_utils_init, grid_utils_end, ptop_min
-   use fv_eta_mod,          only: set_eta
-   use fv_grid_tools_mod,   only: init_grid
-   use fv_mp_mod,           only: mp_start, domain_decomp, mp_assign_gid, global_nest_domain
-   use fv_mp_mod,           only: broadcast_domains, mp_barrier, is_master, setup_master, grids_master_procs, tile_fine
-   use fv_mp_mod,           only: MAX_NNEST, MAX_NTILE
-   use test_cases_mod,      only: read_namelist_test_case_nml
-   use fv_timing_mod,       only: timing_on, timing_off, timing_init, timing_prt
+   use fv_grid_utils_nlm_mod,   only: grid_utils_init, grid_utils_end, ptop_min
+   use fv_eta_nlm_mod,          only: set_eta
+   use fv_grid_tools_nlm_mod,   only: init_grid
+   use fv_mp_nlm_mod,           only: mp_start, domain_decomp, mp_assign_gid, global_nest_domain
+   use fv_mp_nlm_mod,           only: broadcast_domains, mp_barrier, is_master, setup_master, grids_master_procs, tile_fine
+   use fv_mp_nlm_mod,           only: MAX_NNEST, MAX_NTILE
+   use test_cases_nlm_mod,      only: read_namelist_test_case_nml
+   use fv_timing_nlm_mod,       only: timing_on, timing_off, timing_init, timing_prt
    use mpp_domains_mod,     only: domain2D
    use mpp_domains_mod,     only: mpp_define_nest_domains, nest_domain_type, mpp_get_global_domain
    use mpp_domains_mod,     only: mpp_get_C2F_index, mpp_get_F2C_index
@@ -152,15 +152,15 @@ module fv_control_nlm_mod
    use mpp_mod,             only: mpp_send, mpp_sync, mpp_transmit, mpp_set_current_pelist, &
                                   mpp_declare_pelist, mpp_root_pe, mpp_recv, mpp_sync_self, read_input_nml, &
                                   mpp_max
-   use fv_diagnostics_mod,  only: fv_diag_init_gn
-   use coarse_grained_restart_files_mod, only: deallocate_coarse_restart_type
+   use fv_diagnostics_nlm_mod,  only: fv_diag_init_gn
+   use coarse_grained_restart_files_nlm_mod, only: deallocate_coarse_restart_type
 
 
 
 
 
 
-   use molecular_diffusion_mod,     only: molecular_diffusion_init, &
+   use molecular_diffusion_nlm_mod,     only: molecular_diffusion_init, &
                                           read_namelist_molecular_diffusion_nml
 
    implicit none
@@ -250,7 +250,7 @@ module fv_control_nlm_mod
      ! Model Domain parameters
      ! See fv_arrays.F90 for descriptions
      !------------------------------------------
-     !CLEANUP module pointers_nlm
+     !CLEANUP module pointers
      character(len=80) , pointer :: grid_name
      character(len=120), pointer :: grid_file
      integer, pointer :: grid_type
@@ -1023,7 +1023,7 @@ module fv_control_nlm_mod
        read (input_nml_file,fv_grid_nml,iostat=ios)
        ierr = check_nml_error(ios,'fv_grid_nml')
 
-       call write_version_number ( 'FV_CONTROL_MOD', version )
+       call write_version_number ( 'fv_control_nlm_mod', version )
        unit = stdlog()
        write(unit, nml=fv_grid_nml)
 
@@ -1085,7 +1085,7 @@ module fv_control_nlm_mod
        ! Reset input_file_nml to default behavior (CHECK do we still need this???)
        !call read_input_nml
 
-       call write_version_number ( 'FV_CONTROL_MOD', version )
+       call write_version_number ( 'fv_control_nlm_mod', version )
        unit = stdlog()
        write(unit, nml=fv_core_nml)
 
@@ -1338,4 +1338,4 @@ module fv_control_nlm_mod
 !-------------------------------------------------------------------------------
 
 
-end module fv_control_mod
+end module fv_control_nlm_mod

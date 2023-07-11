@@ -33,11 +33,11 @@ module init_hydro_nlm_mod
 !     <td>grav, rdgas, rvgas</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>g_sum</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is_master</td>
 !   </tr>
 !   <tr>
@@ -58,13 +58,13 @@ module init_hydro_nlm_mod
 
 
       use constants_mod,      only: grav, rdgas, rvgas
-      use fv_grid_utils_mod,  only: g_sum
-      use fv_mp_mod,          only: is_master
+      use fv_grid_utils_nlm_mod,  only: g_sum
+      use fv_mp_nlm_mod,          only: is_master
       use field_manager_mod,  only: MODEL_ATMOS
       use tracer_manager_mod, only: get_tracer_index
       use mpp_domains_mod,    only: domain2d
-      use fv_arrays_mod,      only: R_GRID
-!     use fv_diagnostics_mod, only: prt_maxmin
+      use fv_arrays_nlm_mod,      only: R_GRID
+!     use fv_diagnostics_nlm_mod, only: prt_maxmin
 
 
 

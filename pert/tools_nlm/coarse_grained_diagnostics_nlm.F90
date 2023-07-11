@@ -9,12 +9,12 @@ module coarse_grained_diagnostics_nlm_mod
 
   use diag_manager_mod, only: diag_axis_init, register_diag_field, register_static_field, send_data
   use field_manager_mod,  only: MODEL_ATMOS
-  use fv_arrays_mod, only: fv_atmos_type, fv_coarse_graining_type
-  use fv_diagnostics_mod, only: cs3_interpolator, get_height_given_pressure
-  use fv_mapz_mod, only: moist_cp, moist_cv
+  use fv_arrays_nlm_mod, only: fv_atmos_type, fv_coarse_graining_type
+  use fv_diagnostics_nlm_mod, only: cs3_interpolator, get_height_given_pressure
+  use fv_mapz_nlm_mod, only: moist_cp, moist_cv
   use mpp_domains_mod, only: domain2d, EAST, NORTH
   use mpp_mod, only: FATAL, mpp_error
-  use coarse_graining_mod, only: block_sum, get_fine_array_bounds, get_coarse_array_bounds, MODEL_LEVEL, &
+  use coarse_graining_nlm_mod, only: block_sum, get_fine_array_bounds, get_coarse_array_bounds, MODEL_LEVEL, &
                                  weighted_block_average, PRESSURE_LEVEL, vertically_remap_field, &
                                  vertical_remapping_requirements, mask_area_weights, mask_mass_weights, &
                                  block_edge_sum_x, block_edge_sum_y

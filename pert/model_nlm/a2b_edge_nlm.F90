@@ -32,21 +32,21 @@ module a2b_edge_nlm_mod
 !     <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>great_circle_dist, van2 </td>
 !   </tr>
 ! </table>
 
-  use fv_grid_utils_mod, only: great_circle_dist
+  use fv_grid_utils_nlm_mod, only: great_circle_dist
 
 
 
 
-  use fv_arrays_mod,     only: fv_grid_type, R_GRID
+  use fv_arrays_nlm_mod,     only: fv_grid_type, R_GRID
 
   implicit none
 

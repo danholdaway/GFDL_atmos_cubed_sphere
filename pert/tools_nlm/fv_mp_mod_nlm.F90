@@ -21,7 +21,7 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
-!>@brief The module 'fv_mp_mod' is a single program multiple data (1)
+!>@brief The module 'fv_mp_nlm_mod' is a single program multiple data (1)
 !! parallel decompostion/communication module
       module fv_mp_nlm_mod
 
@@ -43,7 +43,7 @@
 !     <td>set_domain</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type</td>
 !   </tr>
 !     <td>mpp_mod</td>
@@ -95,7 +95,7 @@
       use mpp_domains_mod, only : group_halo_update_type => mpp_group_update_type
       use mpp_domains_mod, only : nest_domain_type, mpp_get_io_domain_layout, mpp_get_layout, mpp_copy_domain
       use mpp_parameter_mod, only : WUPDATE, EUPDATE, SUPDATE, NUPDATE, XUPDATE, YUPDATE
-      use fv_arrays_mod, only: fv_atmos_type, fv_grid_bounds_type
+      use fv_arrays_nlm_mod, only: fv_atmos_type, fv_grid_bounds_type
       use mpp_mod, only : mpp_get_current_pelist, mpp_set_current_pelist
       use mpp_domains_mod, only : mpp_get_domain_shift
       use ensemble_manager_mod, only : get_ensemble_id

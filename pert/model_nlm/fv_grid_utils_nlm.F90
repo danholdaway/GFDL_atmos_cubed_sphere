@@ -38,23 +38,23 @@
 !     <td>omega, pi=>pi_8, cnst_radius=>radius</td>
 !   </tr>
 !   <tr>
-!     <td>external_sst_mod</td>
+!     <td>external_sst_nlm_mod</td>
 !     <td>i_sst, j_sst, sst_ncep, sst_anom</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_grid_type, fv_grid_bounds_type,R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>fv_time, prt_mxm, range_check, prt_minmax</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>set_eta</td>
 !   </tr>
 !  <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng, is_master, mp_reduce_sum, mp_reduce_min, mp_reduce_max,fill_corners, XDir, YDir</td>
 !   </tr>
 !   <tr>
@@ -62,7 +62,7 @@
 !     <td>AGRID_PARAM=>AGRID, CGRID_NE_PARAM=>CGRID_NE, CORNER, SCALAR_PAIR</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
@@ -132,19 +132,19 @@
 
  use constants_mod,   only: omega, pi=>pi_8, cnst_radius=>radius
  use mpp_mod,         only: FATAL, mpp_error, WARNING
- use external_sst_mod, only: i_sst, j_sst, sst_ncep, sst_anom
+ use external_sst_nlm_mod, only: i_sst, j_sst, sst_ncep, sst_anom
  use mpp_domains_mod, only: mpp_update_domains, DGRID_NE, mpp_global_sum
  use mpp_domains_mod, only: BITWISE_EXACT_SUM, domain2d, BITWISE_EFP_SUM
  use mpp_parameter_mod, only: AGRID_PARAM=>AGRID, CGRID_NE_PARAM=>CGRID_NE
  use mpp_parameter_mod, only: CORNER, SCALAR_PAIR
 
- use fv_arrays_mod,   only: fv_atmos_type, fv_grid_type, fv_grid_bounds_type, &
+ use fv_arrays_nlm_mod,   only: fv_atmos_type, fv_grid_type, fv_grid_bounds_type, &
                             R_GRID
- use fv_eta_mod,      only: set_eta
- use fv_mp_mod,       only: is_master
- use fv_mp_mod,       only: mp_reduce_sum, mp_reduce_min, mp_reduce_max
- use fv_mp_mod,       only: fill_corners, XDir, YDir
- use fv_timing_mod,   only: timing_on, timing_off
+ use fv_eta_nlm_mod,      only: set_eta
+ use fv_mp_nlm_mod,       only: is_master
+ use fv_mp_nlm_mod,       only: mp_reduce_sum, mp_reduce_min, mp_reduce_max
+ use fv_mp_nlm_mod,       only: fill_corners, XDir, YDir
+ use fv_timing_nlm_mod,   only: timing_on, timing_off
 
  implicit none
  private

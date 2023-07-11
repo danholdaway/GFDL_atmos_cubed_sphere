@@ -4,7 +4,7 @@ module coarse_graining_nlm_mod
 
   use fms_mod, only: check_nml_error
   use mpp_domains_mod, only: domain2d, mpp_define_io_domain, mpp_define_mosaic, mpp_get_compute_domain
-  use fv_mapz_mod, only: mappm
+  use fv_mapz_nlm_mod, only: mappm
   use mpp_mod, only: FATAL, input_nml_file, mpp_error, mpp_npes
 
   implicit none
@@ -387,7 +387,7 @@ contains
   end subroutine block_upsample_3d
 
   ! This subroutine is copied from FMS/test_fms/horiz_interp/test2_horiz_interp.F90.
-  ! domain_decomp in fv_mp_mod.F90 does something similar, but it does a
+  ! domain_decomp in fv_mp_nlm_mod.F90 does something similar, but it does a
   ! few other unnecessary things (and requires more arguments).
   subroutine define_cubic_mosaic(domain, ni, nj, layout)
     type(domain2d), intent(inout) :: domain

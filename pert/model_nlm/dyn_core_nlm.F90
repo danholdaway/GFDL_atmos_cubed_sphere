@@ -34,11 +34,11 @@ module dyn_core_nlm_mod
 !     <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>a2b_edge_mod</td>
+!     <td>a2b_edge_nlm_mod</td>
 !     <td>a2b_ord2, a2b_ord4</td>
 !   </tr>
 !   <tr>
-!     <td>boundary_mod</td>
+!     <td>boundary_nlm_mod</td>
 !     <td>extrapolation_BC, nested_grid_BC_apply_intT</td>
 !   </tr>
 !   <tr>
@@ -54,29 +54,29 @@ module dyn_core_nlm_mod
 !     <td>breed_slp_inline_ada</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, fv_flags_type, fv_nest_type,
 !        fv_diag_type,fv_grid_bounds_type, R_GRID </td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>prt_maxmin, fv_time, prt_mxm</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is_master, start_group_halo_update,
 !          complete_group_halo_update,group_halo_update_type</td>
 !   </tr>
 !   <tr>
-!     <td>fv_nwp_nudge_mod</td>
+!     <td>fv_nwp_nudge_nlm_mod</td>
 !     <td>breed_slp_inline, do_adiabatic_init</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
-!     <td>fv_update_phys_mod</td>
+!     <td>fv_update_phys_nlm_mod</td>
 !     <td>update_dwinds_phys</td>
 !   </tr>
 !   <tr>
@@ -92,15 +92,15 @@ module dyn_core_nlm_mod
 !     <td>CORNER</td>
 !   </tr>
 !   <tr>
-!     <td>nh_core_mod</td>
+!     <td>nh_core_nlm_mod</td>
 !     <td>Riem_Solver3, Riem_Solver_C, update_dz_c, update_dz_d, nest_halo_nh</td>
 !   </tr>
 !   <tr>
-!     <td>test_cases_mod</td>
+!     <td>test_cases_nlm_mod</td>
 !     <td>test_case, case9_forcing1, case9_forcing2</td>
 !   </tr>
 !   <tr>
-!     <td>tp_core_mod</td>
+!     <td>tp_core_nlm_mod</td>
 !     <td>copy_corners</td>
 !   </tr>
 ! </table>
@@ -110,34 +110,34 @@ module dyn_core_nlm_mod
   use mpp_domains_mod,    only: CGRID_NE, DGRID_NE, mpp_get_boundary, mpp_update_domains,  &
                                 domain2d
   use mpp_parameter_mod,  only: CORNER
-  use fv_mp_mod,          only: is_master
-  use fv_mp_mod,          only: start_group_halo_update, complete_group_halo_update
-  use fv_mp_mod,          only: group_halo_update_type
-  use molecular_diffusion_mod,       &
+  use fv_mp_nlm_mod,          only: is_master
+  use fv_mp_nlm_mod,          only: start_group_halo_update, complete_group_halo_update
+  use fv_mp_nlm_mod,          only: group_halo_update_type
+  use molecular_diffusion_nlm_mod,       &
                           only: md_time, md_layers, md_consv_te, md_tadj_layers
-  use sw_core_mod,        only: c_sw, d_sw, d_md
-  use a2b_edge_mod,       only: a2b_ord2, a2b_ord4
-  use nh_core_mod,        only: Riem_Solver3, Riem_Solver_C, update_dz_c, update_dz_d, nh_bc
-  use tp_core_mod,        only: copy_corners
-  use fv_timing_mod,      only: timing_on, timing_off
-  use fv_diagnostics_mod, only: prt_maxmin, fv_time, prt_mxm
-  use fv_diag_column_mod, only: do_diag_debug_dyn, debug_column_dyn
+  use sw_core_nlm_mod,        only: c_sw, d_sw, d_md
+  use a2b_edge_nlm_mod,       only: a2b_ord2, a2b_ord4
+  use nh_core_nlm_mod,        only: Riem_Solver3, Riem_Solver_C, update_dz_c, update_dz_d, nh_bc
+  use tp_core_nlm_mod,        only: copy_corners
+  use fv_timing_nlm_mod,      only: timing_on, timing_off
+  use fv_diagnostics_nlm_mod, only: prt_maxmin, fv_time, prt_mxm
+  use fv_diag_column_nlm_mod, only: do_diag_debug_dyn, debug_column_dyn
 
 
 
 
 
 
-  use fv_nwp_nudge_mod,   only: breed_slp_inline, do_adiabatic_init
+  use fv_nwp_nudge_nlm_mod,   only: breed_slp_inline, do_adiabatic_init
 
   use diag_manager_mod,   only: send_data
-  use fv_arrays_mod,      only: fv_grid_type, fv_flags_type, fv_nest_type, fv_diag_type, &
+  use fv_arrays_nlm_mod,      only: fv_grid_type, fv_flags_type, fv_nest_type, fv_diag_type, &
                                 fv_grid_bounds_type, R_GRID, fv_nest_BC_type_3d
 
-  use boundary_mod,         only: extrapolation_BC,  nested_grid_BC_apply_intT
-  use fv_regional_mod,      only: regional_boundary_update
-  use fv_regional_mod,      only: current_time_in_seconds, bc_time_interval
-  use fv_regional_mod,      only: delz_regBC ! TEMPORARY --- lmh
+  use boundary_nlm_mod,         only: extrapolation_BC,  nested_grid_BC_apply_intT
+  use fv_regional_nlm_mod,      only: regional_boundary_update
+  use fv_regional_nlm_mod,      only: current_time_in_seconds, bc_time_interval
+  use fv_regional_nlm_mod,      only: delz_regBC ! TEMPORARY --- lmh
 
 
 
@@ -145,8 +145,8 @@ module dyn_core_nlm_mod
 
 
 
-  use fv_regional_mod,     only: dump_field, exch_uv, H_STAGGER, U_STAGGER, V_STAGGER
-  use fv_regional_mod,     only: a_step, p_step, k_step, n_step
+  use fv_regional_nlm_mod,     only: dump_field, exch_uv, H_STAGGER, U_STAGGER, V_STAGGER
+  use fv_regional_nlm_mod,     only: a_step, p_step, k_step, n_step
 
 implicit none
 private

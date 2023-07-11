@@ -42,38 +42,38 @@
 !     <td>MODEL_ATMOS</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, fv_flags_type, fv_grid_bounds_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>prt_maxmin, ppme, eqv_pot, qcly0</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_tools_mod</td>
+!     <td>fv_grid_tools_nlm_mod</td>
 !     <td>todeg, missing, spherical_to_cartesian</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>compute_dz_L32, compute_dz_L101, set_hybrid_z,
 !         gw_1d,hybrid_z_dz</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng, is_master,is,js,ie,je, isd,jsd,ied,jed,
 !         domain_decomp, fill_corners, XDir, YDir, mp_stop,
 !         mp_reduce_sum, mp_reduce_max, mp_gather, mp_bcst</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>qsmith</td>
 !   </tr>
 !   <tr>
-!     <td>fv_surf_map_mod</td>
+!     <td>fv_surf_map_nlm_mod</td>
 !     <td>surfdrv</td>
 !   </tr>
 !   <tr>
-!     <td>init_hydro_mod</td>
+!     <td>init_hydro_nlm_mod</td>
 !     <td>p_var, hydro_eq</td>
 !   </tr>
 !   <tr>
@@ -104,17 +104,17 @@
 
       use constants_mod,     only: cnst_radius=>radius, pi=>pi_8, omega, grav, kappa, rdgas, cp_air, rvgas
 
-      use init_hydro_mod,    only: p_var, hydro_eq
-      use fv_mp_mod,         only: is_master,        &
+      use init_hydro_nlm_mod,    only: p_var, hydro_eq
+      use fv_mp_nlm_mod,         only: is_master,        &
                                    domain_decomp, fill_corners, XDir, YDir, &
                                    mp_stop, mp_reduce_sum, mp_reduce_max, mp_gather, mp_bcst
-      use fv_grid_utils_mod, only: cubed_to_latlon, great_circle_dist, mid_pt_sphere,    &
+      use fv_grid_utils_nlm_mod, only: cubed_to_latlon, great_circle_dist, mid_pt_sphere,    &
                                    ptop_min, inner_prod, get_latlon_vector, get_unit_vect2, &
                                    g_sum, latlon2xyz, cart_to_latlon, make_eta_level, f_p, project_sphere_v
-      use fv_surf_map_mod,   only: surfdrv
+      use fv_surf_map_nlm_mod,   only: surfdrv
 
-      use fv_grid_tools_mod, only: todeg, missing, spherical_to_cartesian
-      use fv_eta_mod,        only: compute_dz_L32, compute_dz_L101, set_hybrid_z, gw_1d,   &
+      use fv_grid_tools_nlm_mod, only: todeg, missing, spherical_to_cartesian
+      use fv_eta_nlm_mod,        only: compute_dz_L32, compute_dz_L101, set_hybrid_z, gw_1d,   &
                                    hybrid_z_dz
 
       use mpp_mod,           only: mpp_error, FATAL, mpp_root_pe, mpp_broadcast, mpp_sum
@@ -123,12 +123,12 @@
       use mpp_domains_mod,   only: mpp_update_domains, domain2d
       use mpp_parameter_mod, only: AGRID_PARAM=>AGRID,CGRID_NE_PARAM=>CGRID_NE, &
                                    SCALAR_PAIR
-      use fv_sg_mod,         only: qsmith
-      use fv_diagnostics_mod, only: prt_maxmin, ppme, eqv_pot, qcly0
+      use fv_sg_nlm_mod,         only: qsmith
+      use fv_diagnostics_nlm_mod, only: prt_maxmin, ppme, eqv_pot, qcly0
 !!! DEBUG CODE
      use mpp_mod, only: mpp_pe, mpp_chksum, stdout
 !!! END DEBUG CODE
-      use fv_arrays_mod,         only: fv_grid_type, fv_flags_type, fv_grid_bounds_type, R_GRID
+      use fv_arrays_nlm_mod,         only: fv_grid_type, fv_flags_type, fv_grid_bounds_type, R_GRID
       use tracer_manager_mod,    only: get_tracer_index
       use field_manager_mod,     only: MODEL_ATMOS
       implicit none

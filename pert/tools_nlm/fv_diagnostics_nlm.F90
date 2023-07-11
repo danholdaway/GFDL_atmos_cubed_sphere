@@ -30,7 +30,7 @@ module fv_diagnostics_nlm_mod
 !     <th>Functions Included</th>
 !   </tr>
 !   <tr>
-!     <td>a2b_edge_mod</td>
+!     <td>a2b_edge_nlm_mod</td>
 !     <td>a2b_ord2, a2b_ord4</td>
 !   </tr>
 !   <tr>
@@ -52,40 +52,40 @@ module fv_diagnostics_nlm_mod
 !     <td>write_version_number</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_grid_type, fv_diag_type, fv_grid_bounds_type,
 !         R_GRIDmax_step</td>
 !   </tr>
 !   <tr>
-!     <td>fv_eta_mod</td>
+!     <td>fv_eta_nlm_mod</td>
 !     <td>get_eta_level, gw_1d</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td> g_sum</td>
 !   </tr>
 !   <tr>
-!     <td>fv_io_mod</td>
+!     <td>fv_io_nlm_mod</td>
 !     <td>fv_io_read_tracers</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>mp_reduce_sum, mp_reduce_min, mp_reduce_max, is_master</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mapz_mod</td>
+!     <td>fv_mapz_nlm_mod</td>
 !     <td>E_Flux, moist_cv</td>
 !   </tr>
 !   <tr>
-!     <td>fv_sg_mod</td>
+!     <td>fv_sg_nlm_mod</td>
 !     <td>qsmith</td>
 !   </tr>
 !   <tr>
-!     <td>fv_surf_map_mod</td>
+!     <td>fv_surf_map_nlm_mod</td>
 !     <td>zs_g</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
@@ -127,28 +127,28 @@ module fv_diagnostics_nlm_mod
  use diag_manager_mod,   only: diag_axis_init, register_diag_field, &
                                register_static_field, send_data, diag_grid_init, &
                                diag_field_add_attribute
- use fv_arrays_mod,      only: fv_atmos_type, fv_grid_type, fv_diag_type, fv_grid_bounds_type, &
+ use fv_arrays_nlm_mod,      only: fv_atmos_type, fv_grid_type, fv_diag_type, fv_grid_bounds_type, &
                                R_GRID
- use fv_mapz_mod,        only: E_Flux, moist_cv, moist_cp, mappm
- use fv_mp_mod,          only: mp_reduce_sum, mp_reduce_min, mp_reduce_max, is_master
- use fv_eta_mod,         only: get_eta_level, gw_1d
- use fv_grid_utils_mod,  only: g_sum
- use a2b_edge_mod,       only: a2b_ord2, a2b_ord4
- use fv_surf_map_mod,    only: zs_g
- use fv_sg_mod,          only: qsmith
+ use fv_mapz_nlm_mod,        only: E_Flux, moist_cv, moist_cp, mappm
+ use fv_mp_nlm_mod,          only: mp_reduce_sum, mp_reduce_min, mp_reduce_max, is_master
+ use fv_eta_nlm_mod,         only: get_eta_level, gw_1d
+ use fv_grid_utils_nlm_mod,  only: g_sum
+ use a2b_edge_nlm_mod,       only: a2b_ord2, a2b_ord4
+ use fv_surf_map_nlm_mod,    only: zs_g
+ use fv_sg_nlm_mod,          only: qsmith
 
  use tracer_manager_mod, only: get_tracer_names, get_number_tracers, get_tracer_index
  use field_manager_mod,  only: MODEL_ATMOS
  use mpp_mod,            only: mpp_error, FATAL, stdlog, mpp_pe, mpp_root_pe, mpp_sum, mpp_max, NOTE, input_nml_file
  use sat_vapor_pres_mod, only: compute_qs, lookup_es
 
- use fv_arrays_mod, only: max_step
+ use fv_arrays_nlm_mod, only: max_step
 
 
 
 
 
- use fv_diag_column_mod, only: fv_diag_column_init, sounding_column, debug_column
+ use fv_diag_column_nlm_mod, only: fv_diag_column_init, sounding_column, debug_column
 
 
 
@@ -398,7 +398,7 @@ contains
 
     real, allocatable :: dx(:,:), dy(:,:)
 
-    call write_version_number ( 'FV_DIAGNOSTICS_MOD', version )
+    call write_version_number ( 'fv_diagnostics_nlm_mod', version )
 
     idiag => Atm(1)%idiag
 

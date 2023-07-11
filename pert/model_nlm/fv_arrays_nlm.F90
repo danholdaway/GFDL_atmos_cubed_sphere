@@ -1032,7 +1032,7 @@ module fv_arrays_nlm_mod
      logical, allocatable :: do_remap_BC(:)
      logical, allocatable :: do_remap_BC_level(:)
 
-     !nest_domain now a global structure defined in fv_mp_mod
+     !nest_domain now a global structure defined in fv_mp_nlm_mod
      !type(nest_domain_type) :: nest_domain !Structure holding link from this grid to its parent
      !type(nest_domain_type), allocatable :: nest_domain_all(:)
      integer                :: num_nest_level = -1 !< number of nest levels.

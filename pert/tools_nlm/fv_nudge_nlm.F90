@@ -42,7 +42,7 @@ module fv_nwp_nudge_nlm_mod
 !     <td>pi=>pi_8, grav, rdgas, cp_air, kappa, cnst_radius =>radius</td>
 !   </tr>
 !   <tr>
-!     <td>external_sst_mod</td>
+!     <td>external_sst_nlm_mod</td>
 !     <td>i_sst, j_sst, sst_ncep, sst_anom, forecast_mode</td>
 !   </tr>
 !   <tr>
@@ -55,28 +55,28 @@ module fv_nwp_nudge_nlm_mod
 !         file_exist, close_file</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, fv_grid_bounds_type, fv_nest_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_diagnostics_mod</td>
+!     <td>fv_diagnostics_nlm_mod</td>
 !     <td>prt_maxmin, fv_time</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>great_circle_dist, intp_great_circle,
 !         latlon2xyz, vect_cross, normalize_vect</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>nmp_reduce_sum, mp_reduce_min, mp_reduce_max, is_master</td>
 !   </tr>
 !   <tr>
-!     <td>fv_mapz_mod</td>
+!     <td>fv_mapz_nlm_mod</td>
 !     <td>mappm</td>
 !   </tr>
 !   <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !   <tr>
@@ -84,7 +84,7 @@ module fv_nwp_nudge_nlm_mod
 !     <td>mpp_error, FATAL, stdlog, get_unit, mpp_pe</td>
 !   </tr>
 !   <tr>
-!     <td>sim_nc_mod</td>
+!     <td>sim_nc_nlm_mod</td>
 !     <td>open_ncfile, close_ncfile, get_ncdim1, get_var1_double,
 !         get_var3_r4, get_var1_real</td>
 !   </tr>
@@ -97,12 +97,12 @@ module fv_nwp_nudge_nlm_mod
 !     <td>time_type,  get_time, get_date</td>
 !   </tr>
 !   <tr>
-!     <td>tp_core_mod</td>
+!     <td>tp_core_nlm_mod</td>
 !     <td>copy_corners</td>
 !   </tr>
 ! </table>
 
- use external_sst_mod,  only: i_sst, j_sst, sst_ncep, sst_anom, forecast_mode
+ use external_sst_nlm_mod,  only: i_sst, j_sst, sst_ncep, sst_anom, forecast_mode
  use diag_manager_mod,  only: register_diag_field, send_data
 
 
@@ -116,17 +116,17 @@ module fv_nwp_nudge_nlm_mod
  use time_manager_mod,  only: time_type,  get_time, get_date
  use platform_mod,      only: r4_kind, r8_kind
 
- use fv_grid_utils_mod, only: great_circle_dist, intp_great_circle
- use fv_grid_utils_mod, only: latlon2xyz, vect_cross, normalize_vect
- use fv_diagnostics_mod,only: prt_maxmin, fv_time
- use tp_core_mod,       only: copy_corners
- use fv_mapz_mod,       only: mappm
- use fv_mp_mod,         only: mp_reduce_sum, mp_reduce_min, mp_reduce_max, is_master
- use fv_timing_mod,     only: timing_on, timing_off
+ use fv_grid_utils_nlm_mod, only: great_circle_dist, intp_great_circle
+ use fv_grid_utils_nlm_mod, only: latlon2xyz, vect_cross, normalize_vect
+ use fv_diagnostics_nlm_mod,only: prt_maxmin, fv_time
+ use tp_core_nlm_mod,       only: copy_corners
+ use fv_mapz_nlm_mod,       only: mappm
+ use fv_mp_nlm_mod,         only: mp_reduce_sum, mp_reduce_min, mp_reduce_max, is_master
+ use fv_timing_nlm_mod,     only: timing_on, timing_off
 
- use sim_nc_mod,        only: open_ncfile, close_ncfile, get_ncdim1, get_var1_double, &
+ use sim_nc_nlm_mod,        only: open_ncfile, close_ncfile, get_ncdim1, get_var1_double, &
                               get_var3_r4, get_var1_real
- use fv_arrays_mod,     only: fv_grid_type, fv_grid_bounds_type, fv_nest_type, R_GRID
+ use fv_arrays_nlm_mod,     only: fv_grid_type, fv_grid_bounds_type, fv_nest_type, R_GRID
 
 
 

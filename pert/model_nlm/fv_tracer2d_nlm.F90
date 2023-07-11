@@ -32,21 +32,21 @@
 !   </tr>
 ! <table>
 !   <tr>
-!     <td>boundary_mod</td>
+!     <td>boundary_nlm_mod</td>
 !     <td>nested_grid_BC_apply_intT</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_grid_type, fv_nest_type, fv_atmos_type, fv_grid_bounds_type</td>
 !   </tr>
 !   <tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>mp_reduce_max, ng, mp_gather, is_master, group_halo_update_type,
 !         start_group_halo_update, complete_group_halo_update</td>
 !   </tr>
 !    <tr>
-!     <td>fv_timing_mod</td>
+!     <td>fv_timing_nlm_mod</td>
 !     <td>timing_on, timing_off</td>
 !   </tr>
 !  <tr>
@@ -58,23 +58,23 @@
 !     <td>mpp_update_domains, CGRID_NE, domain2d</td>
 !   </tr>
 !   <tr>
-!     <td>tp_core_mod</td>
+!     <td>tp_core_nlm_mod</td>
 !     <td>fv_tp_2d, copy_corners</td>
 !   </tr>
 ! </table>
 
 module fv_tracer2d_nlm_mod
-   use tp_core_mod,       only: fv_tp_2d, copy_corners
-   use fv_mp_mod,         only: mp_reduce_max
-   use fv_mp_mod,         only: mp_gather, is_master
-   use fv_mp_mod,         only: group_halo_update_type
-   use fv_mp_mod,         only: start_group_halo_update, complete_group_halo_update
+   use tp_core_nlm_mod,       only: fv_tp_2d, copy_corners
+   use fv_mp_nlm_mod,         only: mp_reduce_max
+   use fv_mp_nlm_mod,         only: mp_gather, is_master
+   use fv_mp_nlm_mod,         only: group_halo_update_type
+   use fv_mp_nlm_mod,         only: start_group_halo_update, complete_group_halo_update
    use mpp_domains_mod,   only: mpp_update_domains, CGRID_NE, domain2d
-   use fv_timing_mod,     only: timing_on, timing_off
-   use boundary_mod,      only: nested_grid_BC_apply_intT
-   use fv_regional_mod,   only: regional_boundary_update
-   use fv_regional_mod,   only: current_time_in_seconds
-   use fv_arrays_mod,     only: fv_grid_type, fv_nest_type, fv_atmos_type, fv_grid_bounds_type
+   use fv_timing_nlm_mod,     only: timing_on, timing_off
+   use boundary_nlm_mod,      only: nested_grid_BC_apply_intT
+   use fv_regional_nlm_mod,   only: regional_boundary_update
+   use fv_regional_nlm_mod,   only: current_time_in_seconds
+   use fv_arrays_nlm_mod,     only: fv_grid_type, fv_nest_type, fv_atmos_type, fv_grid_bounds_type
    use mpp_mod,           only: mpp_error, FATAL, mpp_broadcast, mpp_send, mpp_recv, mpp_sum, mpp_max
 
 implicit none

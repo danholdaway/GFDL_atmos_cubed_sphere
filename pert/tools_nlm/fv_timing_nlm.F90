@@ -30,7 +30,7 @@
 !     <th>Module Name</th>
 !     <th>Functions Included</th>
 !   </tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>is_master, mp_reduce_max</td>
 !   </tr>
 !   <tr>
@@ -41,7 +41,7 @@
 
       use mpp_mod, only: mpp_error, FATAL
 
-      use fv_mp_mod, only: is_master, mp_reduce_max
+      use fv_mp_nlm_mod, only: is_master, mp_reduce_max
 
 !
 ! ... Use system etime() function for timing
@@ -184,7 +184,7 @@
 
 !         write(*,*) 'timing_off ', ctmp, tblk, tblk
         if ( iblk .eq. 0 ) then
-            call mpp_error(FATAL,'fv_timing_mod: timing_off called before timing_on for: '//trim(blk_name))
+            call mpp_error(FATAL,'fv_timing_nlm_mod: timing_off called before timing_on for: '//trim(blk_name))
 !           write(*,*) 'stop in timing off in ', ctmp
 !           stop
         endif

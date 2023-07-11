@@ -67,16 +67,16 @@ module fv_treat_da_inc_nlm_mod
 !         clock_flag_default, nullify_domain</td>
 !   </tr>
 !   <tr>
-!     <td>fv_arrays_mod</td>
+!     <td>fv_arrays_nlm_mod</td>
 !     <td>fv_atmos_type, fv_grid_type, fv_grid_bounds_type,
 !          R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_control_mod</td>
+!     <td>fv_control_nlm_mod</td>
 !     <td>fv_init, fv_end, ngrids</td>
 !   </tr>
 !   <tr>
-!     <td>fv_grid_utils_mod</td>
+!     <td>fv_grid_utils_nlm_mod</td>
 !     <td>ptop_min, g_sum, mid_pt_sphere, get_unit_vect2,
 !         get_latlon_vector, inner_prod, cubed_to_latlon</td>
 !   </tr>
@@ -85,7 +85,7 @@ module fv_treat_da_inc_nlm_mod
 !     <td>file_exists
 !   </tr>
 !   <tr>
-!     <td>fv_mp_mod</td>
+!     <td>fv_mp_nlm_mod</td>
 !     <td>ng,is_master,fill_corners,YDir,mp_reduce_min, mp_reduce_max</td>
 !   </tr>
 !   <tr>
@@ -97,7 +97,7 @@ module fv_treat_da_inc_nlm_mod
 !     <td>mpp_get_tile_id, domain2d, mpp_update_domains,NORTH, EAST</td>
 !   </tr>
 !   <tr>
-!     <td>sim_nc_mod</td>
+!     <td>sim_nc_nlm_mod</td>
 !     <td>open_ncfile, close_ncfile, get_ncdim1, get_var1_double,
 !         get_var2_real, get_var3_r4, get_var1_real</td>
 !   </tr>
@@ -121,20 +121,20 @@ module fv_treat_da_inc_nlm_mod
 
   use constants_mod,     only: pi=>pi_8, omega, grav, kappa, &
                                rdgas, rvgas, cp_air
-  use fv_arrays_mod,     only: fv_atmos_type, &
+  use fv_arrays_nlm_mod,     only: fv_atmos_type, &
                                fv_grid_type, &
                                fv_grid_bounds_type, &
                                R_GRID
-  use fv_grid_utils_mod, only: ptop_min, g_sum, &
+  use fv_grid_utils_nlm_mod, only: ptop_min, g_sum, &
                                mid_pt_sphere, get_unit_vect2, &
                                get_latlon_vector, inner_prod, &
                                cubed_to_latlon
-  use fv_mp_mod,         only: is_master, &
+  use fv_mp_nlm_mod,         only: is_master, &
                                fill_corners, &
                                YDir, &
                                mp_reduce_min, &
                                mp_reduce_max
-  use sim_nc_mod,        only: open_ncfile, &
+  use sim_nc_nlm_mod,        only: open_ncfile, &
                                close_ncfile, &
                                get_ncdim1, &
                                get_var1_double, &
