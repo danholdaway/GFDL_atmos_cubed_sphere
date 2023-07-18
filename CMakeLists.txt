@@ -52,11 +52,11 @@ else()
   set(kind "R8")
 endif()
 
-# if(NOT FMS_FOUND)
-#   find_package(FMS REQUIRED COMPONENTS ${kind})
-#   string(TOLOWER ${kind} kind_lower)
-#   add_library(fms ALIAS FMS::fms_${kind_lower})
-# endif()
+if(NOT FMS_FOUND)
+  find_package(FMS REQUIRED COMPONENTS ${kind})
+  string(TOLOWER ${kind} kind_lower)
+  add_library(fms ALIAS FMS::fms_${kind_lower})
+endif()
 
 list(APPEND model_srcs
   model/a2b_edge.F90
