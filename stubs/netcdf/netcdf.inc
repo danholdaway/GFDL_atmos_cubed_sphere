@@ -1,0 +1,142 @@
+
+    integer :: nf_noerr, nf_nowrite
+
+    interface nf_open
+        integer function nf95_open(path ,mode, ncid)
+            character(len=*), intent(in) :: path
+            integer, intent(in) :: mode
+            integer, intent(out) :: ncid
+        end function nf95_open
+    end interface
+
+    interface nf_close
+        integer function nf90_close(ncid)
+            integer, intent(in) :: ncid
+        end function nf90_close
+    end interface
+
+    interface nf_inq_dimid
+        integer function nf90_inq_dimid(ncid,name,dimid)
+            integer, intent(in) :: ncid
+            character(len=*), intent(in) :: name
+            integer, intent(out) :: dimid
+        end function nf90_inq_dimid
+    end interface
+
+    interface nf_inq_dimlen
+        integer function nf90_inq_dimlen(ncid,dimid,dimlen)
+            integer, intent(in) :: ncid, dimid
+            integer, intent(out) :: dimlen
+        end function nf90_inq_dimlen
+    end interface
+
+    interface nf_inq_varid
+        integer function nf90_inq_varid(ncid,name,varid)
+            integer, intent(in) :: ncid
+            character(len=*), intent(in) :: name
+            integer, intent(out) :: varid
+        end function nf90_inq_varid
+    end interface
+
+    interface nf_get_var_real
+        integer function nf90_get_var_r4_1d(ncid,varid,var,start,count,stride)
+            integer, intent(in) :: ncid, varid
+            real(kind=4), intent(out) :: var(:)
+            integer, optional, intent(in) :: start(:),  count(:), stride(:)
+        end function nf90_get_var_r4_1d 
+
+        integer function nf90_get_var_r4_2d(ncid,varid,var,start,count,stride)
+            integer, intent(in) :: ncid, varid
+            real(kind=4), intent(out) :: var(:,:)
+            integer, optional, intent(in) :: start(:),  count(:), stride(:)
+        end function nf90_get_var_r4_2d 
+
+        integer function nf90_get_var_r4_3d(ncid,varid,var,start,count,stride)
+            integer, intent(in) :: ncid, varid
+            real(kind=4), intent(out) :: var(:,:,:)
+            integer, optional, intent(in) :: start(:),  count(:), stride(:)
+        end function nf90_get_var_r4_3d 
+    end interface
+
+    interface nf_get_var_double
+        integer function nf90_get_var_r8_1d(ncid,varid,var,start,count,stride)
+            integer, intent(in) :: ncid, varid
+            real(kind=8), intent(out) :: var(:)
+            integer, optional, intent(in) :: start(:),  count(:), stride(:)
+        end function nf90_get_var_r8_1d 
+
+        integer function nf90_get_var_r8_2d(ncid,varid,var,start,count,stride)
+            integer, intent(in) :: ncid, varid
+            real(kind=8), intent(out) :: var(:,:)
+            integer, optional, intent(in) :: start(:),  count(:), stride(:)
+        end function nf90_get_var_r8_2d 
+
+        integer function nf90_get_var_r8_3d(ncid,varid,var,start,count,stride)
+            integer, intent(in) :: ncid, varid
+            real(kind=8), intent(out) :: var(:,:,:)
+            integer, optional, intent(in) :: start(:),  count(:), stride(:)
+        end function nf90_get_var_r8_3d 
+    end interface
+
+    interface nf_get_vara_real
+        integer function nf_get_vara_real_2d(ncid,varid,start,count,var)
+            integer, intent(in) :: ncid, varid
+            integer, optional, intent(in) :: start(:),  count(:)
+            real(kind=4), intent(out) :: var(:,:)
+        end function nf_get_vara_real_2d
+
+        integer function nf_get_vara_real_3d(ncid,varid,start,count,var)
+            integer, intent(in) :: ncid, varid
+            integer, optional, intent(in) :: start(:),  count(:)
+            real(kind=4), intent(out) :: var(:,:,:)
+        end function nf_get_vara_real_3d
+
+        integer function nf_get_vara_real_4d(ncid,varid,start,count,var)
+            integer, intent(in) :: ncid, varid
+            integer, optional, intent(in) :: start(:),  count(:)
+            real(kind=4), intent(out) :: var(:,:,:,:)
+        end function nf_get_vara_real_4d
+    end interface
+
+    interface nf_get_vara_double
+        integer function nf_get_vara_double_2d(ncid,varid,start,count,var)
+            integer, intent(in) :: ncid, varid
+            integer, optional, intent(in) :: start(:),  count(:)
+            real(kind=8), intent(out) :: var(:,:)
+        end function nf_get_vara_double_2d
+
+        integer function nf_get_vara_double_3d(ncid,varid,start,count,var)
+            integer, intent(in) :: ncid, varid
+            integer, optional, intent(in) :: start(:),  count(:)
+            real(kind=8), intent(out) :: var(:,:,:)
+        end function nf_get_vara_double_3d
+
+        integer function nf_get_vara_double_4d(ncid,varid,start,count,var)
+            integer, intent(in) :: ncid, varid
+            integer, optional, intent(in) :: start(:),  count(:)
+            real(kind=8), intent(out) :: var(:,:,:,:)
+        end function nf_get_vara_double_4d
+    end interface
+
+    interface nf_get_att
+        integer function nf_get_att_r8_0d(ncid,varid,att_name,att_val)
+            integer, intent(in) :: ncid, varid
+            character(len=*), intent(in) :: att_name
+            real(kind=8), intent(out) :: att_val
+        end function nf_get_att_r8_0d
+    end interface
+
+    interface nf_get_att_text
+        integer function nf_get_att_str(ncid,varid,att_name,att_text)
+            integer, intent(in) :: ncid, varid
+            character(len=*), intent(in) :: att_name
+            character(len=*), intent(out) :: att_text
+        end function nf_get_att_str
+    end interface
+
+    interface nf_strerror
+        function nf90_strerror(status)
+            integer, intent(in) ::  status 
+            character(len=50) :: nf90_strerror
+        end function nf90_strerror
+    end interface

@@ -11,8 +11,10 @@ module netcdf
     end interface
 
     interface nf90_get_var
+        module procedure nf90_get_var_r4_1d
         module procedure nf90_get_var_r4_2d
         module procedure nf90_get_var_r4_3d
+        module procedure nf90_get_var_r8_1d
         module procedure nf90_get_var_r8_2d
         module procedure nf90_get_var_r8_3d
     end interface
@@ -58,6 +60,12 @@ contains
         integer, optional, intent(in) :: start(:),  count(:), stride(:)
     end function nf90_put_var_r8_3d
 
+    integer function nf90_get_var_r4_1d(ncid,varid,var,start,count,stride)
+        integer, intent(in) :: ncid, varid
+        real(kind=4), intent(out) :: var(:)
+        integer, optional, intent(in) :: start(:),  count(:), stride(:)
+    end function nf90_get_var_r4_1d 
+
     integer function nf90_get_var_r4_2d(ncid,varid,var,start,count,stride)
         integer, intent(in) :: ncid, varid
         real(kind=4), intent(out) :: var(:,:)
@@ -69,6 +77,12 @@ contains
         real(kind=4), intent(out) :: var(:,:,:)
         integer, optional, intent(in) :: start(:),  count(:), stride(:)
     end function nf90_get_var_r4_3d 
+
+    integer function nf90_get_var_r8_1d(ncid,varid,var,start,count,stride)
+        integer, intent(in) :: ncid, varid
+        real(kind=8), intent(out) :: var(:)
+        integer, optional, intent(in) :: start(:),  count(:), stride(:)
+    end function nf90_get_var_r8_1d 
 
     integer function nf90_get_var_r8_2d(ncid,varid,var,start,count,stride)
         integer, intent(in) :: ncid, varid
@@ -103,6 +117,11 @@ contains
         character(len=*), intent(in) :: name
         integer, intent(out) :: dimid
     end function nf90_inq_dimid
+
+    integer function nf90_inq_dimlen(ncid,dimid,dimlen)
+        integer, intent(in) :: ncid, dimid
+        integer, intent(out) :: dimlen
+    end function nf90_inq_dimlen
 
     integer function nf90_inquire_dimension(ncid,dimid,len)
         integer, intent(in) :: ncid, dimid

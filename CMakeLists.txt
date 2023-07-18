@@ -106,7 +106,8 @@ list(APPEND stubs_srcs
   stubs/fms/sat_vapor_pres.F90
   stubs/fms/constantsR4.F90
   stubs/fms/block_control.F90
-  stubs/netcdf/netcdf.F90)
+  stubs/netcdf/netcdf.F90
+  stubs/netcdf/netcdf_inc.F90)
 
 list(APPEND tools_srcs
   tools/coarse_grained_diagnostics.F90
@@ -214,6 +215,7 @@ target_include_directories(fv3 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_D
 
 target_include_directories(fv3 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                        ${CMAKE_CURRENT_SOURCE_DIR}/stubs/fms
+                                       ${CMAKE_CURRENT_SOURCE_DIR}/stubs/netcdf
                                        ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
 target_compile_definitions(fv3 PRIVATE "${fv3_defs}")
