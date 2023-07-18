@@ -105,6 +105,7 @@ list(APPEND stubs_srcs
   stubs/fms/mosaic.F90
   stubs/fms/sat_vapor_pres.F90
   stubs/fms/constantsR4.F90
+  stubs/fms/block_control.F90
   stubs/netcdf/netcdf.F90)
 
 list(APPEND tools_srcs
