@@ -274,7 +274,6 @@ module sim_nc_mod
 
       subroutine get_var4_real( ncid, var4_name, im, jm, km, nt, var4 )
       implicit         none
-#include <netcdf.inc>
       integer, intent(in):: ncid
       character*(*), intent(in)::  var4_name
       integer, intent(in):: im, jm, km, nt
@@ -381,7 +380,6 @@ module sim_nc_mod
 
       subroutine get_var_att_str(ncid, var_name, att_name, att)
       implicit none
-#include <netcdf.inc>
       integer, intent(in):: ncid
       character*(*), intent(in)::  var_name, att_name
       character*(*), intent(out)::  att
@@ -397,7 +395,6 @@ module sim_nc_mod
 
       subroutine get_var_att_double(ncid, var_name, att_name, value)
       implicit none
-#include <netcdf.inc>
       integer, intent(in):: ncid
       character*(*), intent(in)::  var_name, att_name
       real(kind=8), intent(out)::  value
