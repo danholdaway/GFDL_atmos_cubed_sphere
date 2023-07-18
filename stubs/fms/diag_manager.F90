@@ -22,58 +22,68 @@ INTERFACE send_data
     MODULE PROCEDURE send_data_3d
 END INTERFACE 
 
+! Replaced CLASS(*) with interface, to avoid Tapenade error
+interface diag_axis_init
+    module procedure diag_axis_init_i_1d
+    module procedure diag_axis_init_r_1d
+end interface
+
     
 contains
 
+! TODO: remove because it isn't used and it cause and error in Tapenade
 LOGICAL FUNCTION send_data_0d(diag_field_id, field, time, err_msg)
 INTEGER, INTENT(in) :: diag_field_id
-CLASS(*), INTENT(in) :: field
+REAL, INTENT(in) :: field
 TYPE(time_type), INTENT(in), OPTIONAL :: time
 CHARACTER(len=*), INTENT(out), OPTIONAL :: err_msg
 END FUNCTION send_data_0d
 
+! TODO: remove because it isn't used and it cause and error in Tapenade
 !> @return true if send is successful
 LOGICAL FUNCTION send_data_1d(diag_field_id, field, time, is_in, mask, rmask, ie_in, weight, err_msg)
 INTEGER, INTENT(in) :: diag_field_id
-CLASS(*), DIMENSION(:), INTENT(in) :: field
-CLASS(*), INTENT(in), OPTIONAL :: weight
-CLASS(*), INTENT(in), DIMENSION(:), OPTIONAL :: rmask
+REAL, DIMENSION(:), INTENT(in) :: field
+REAL, INTENT(in), OPTIONAL :: weight
 TYPE (time_type), INTENT(in), OPTIONAL :: time
 INTEGER, INTENT(in), OPTIONAL :: is_in, ie_in
 LOGICAL, INTENT(in), DIMENSION(:), OPTIONAL :: mask
+REAL, INTENT(in), DIMENSION(:), OPTIONAL :: rmask
 CHARACTER(len=*), INTENT(out), OPTIONAL :: err_msg
 END FUNCTION send_data_1d
 
+! TODO: remove because it isn't used and it cause and error in Tapenade
 !> @return true if send is successful
 LOGICAL FUNCTION send_data_2d(diag_field_id, field, time, is_in, js_in, &
    & mask, rmask, ie_in, je_in, weight, err_msg)
 INTEGER, INTENT(in) :: diag_field_id
-CLASS(*), INTENT(in), DIMENSION(:,:) :: field
-CLASS(*), INTENT(in), OPTIONAL :: weight
+REAL, INTENT(in), DIMENSION(:,:) :: field
+REAL, INTENT(in), OPTIONAL :: weight
 TYPE (time_type), INTENT(in), OPTIONAL :: time
 INTEGER, INTENT(in), OPTIONAL :: is_in, js_in, ie_in, je_in
 LOGICAL, INTENT(in), DIMENSION(:,:), OPTIONAL :: mask
-CLASS(*), INTENT(in), DIMENSION(:,:),OPTIONAL :: rmask
+REAL, INTENT(in), DIMENSION(:,:),OPTIONAL :: rmask
 CHARACTER(len=*), INTENT(out), OPTIONAL :: err_msg
 END FUNCTION send_data_2d
 
+! TODO: remove because it isn't used and it cause and error in Tapenade
 !> @return true if send is successful
 LOGICAL FUNCTION send_data_3d(diag_field_id, field, time, is_in, js_in, ks_in, &
          & mask, rmask, ie_in, je_in, ke_in, weight, err_msg)
 INTEGER, INTENT(in) :: diag_field_id
-CLASS(*), DIMENSION(:,:,:), INTENT(in) :: field
-CLASS(*), INTENT(in), OPTIONAL :: weight
+REAL, DIMENSION(:,:,:), INTENT(in) :: field
+REAL, INTENT(in), OPTIONAL :: weight
 TYPE (time_type), INTENT(in), OPTIONAL :: time
 INTEGER, INTENT(in), OPTIONAL :: is_in, js_in, ks_in,ie_in,je_in, ke_in
 LOGICAL, DIMENSION(:,:,:), INTENT(in), OPTIONAL :: mask
-CLASS(*), DIMENSION(:,:,:), INTENT(in), OPTIONAL :: rmask
+REAL, DIMENSION(:,:,:), INTENT(in), OPTIONAL :: rmask
 CHARACTER(len=*), INTENT(out), OPTIONAL :: err_msg
 END FUNCTION send_data_3d
 
-INTEGER FUNCTION diag_axis_init(name, DATA, units, cart_name, long_name, direction,&
+INTEGER FUNCTION diag_axis_init_i_1d(name, DATA, units, cart_name, long_name, direction,&
 & set_name, edges, Domain, Domain2, DomainU, aux, req, tile_count, domain_position )
 CHARACTER(len=*), INTENT(in) :: name !< Short name for axis
-CLASS(*), DIMENSION(:), INTENT(in) :: DATA !< Array of coordinate values
+real, DIMENSION(:), INTENT(in) :: DATA !< Array of coordinate values
 CHARACTER(len=*), INTENT(in) :: units !< Units for the axis
 CHARACTER(len=*), INTENT(in) :: cart_name !< Cartesian axis ("X", "Y", "Z", "T")
 CHARACTER(len=*), INTENT(in), OPTIONAL :: long_name !< Long name for the axis.
@@ -87,14 +97,34 @@ CHARACTER(len=*), INTENT(in), OPTIONAL :: aux !< Auxiliary name, can only be <TT
 CHARACTER(len=*), INTENT(in), OPTIONAL :: req !< Required field names.
 INTEGER, INTENT(in), OPTIONAL :: tile_count
 INTEGER, INTENT(in), OPTIONAL :: domain_position
-end function diag_axis_init
+end function diag_axis_init_i_1d
 
+INTEGER FUNCTION diag_axis_init_r_1d(name, DATA, units, cart_name, long_name, direction,&
+& set_name, edges, Domain, Domain2, DomainU, aux, req, tile_count, domain_position )
+CHARACTER(len=*), INTENT(in) :: name !< Short name for axis
+integer, DIMENSION(:), INTENT(in) :: DATA !< Array of coordinate values
+CHARACTER(len=*), INTENT(in) :: units !< Units for the axis
+CHARACTER(len=*), INTENT(in) :: cart_name !< Cartesian axis ("X", "Y", "Z", "T")
+CHARACTER(len=*), INTENT(in), OPTIONAL :: long_name !< Long name for the axis.
+CHARACTER(len=*), INTENT(in), OPTIONAL :: set_name
+INTEGER, INTENT(in), OPTIONAL :: direction !< Indicates the direction of the axis
+INTEGER, INTENT(in), OPTIONAL :: edges !< Axis ID for the previously defined "edges axis"
+TYPE(domain1d), INTENT(in), OPTIONAL :: Domain
+TYPE(domain2d), INTENT(in), OPTIONAL :: Domain2
+TYPE(domainUG), INTENT(in), OPTIONAL :: DomainU
+CHARACTER(len=*), INTENT(in), OPTIONAL :: aux !< Auxiliary name, can only be <TT>geolon_t</TT> or <TT>geolat_t</TT>
+CHARACTER(len=*), INTENT(in), OPTIONAL :: req !< Required field names.
+INTEGER, INTENT(in), OPTIONAL :: tile_count
+INTEGER, INTENT(in), OPTIONAL :: domain_position
+end function diag_axis_init_r_1d
+
+! TODO: removed class(*) to avoid error in Tapenade
 SUBROUTINE diag_grid_init(domain, glo_lat, glo_lon, aglo_lat, aglo_lon)
     TYPE(domain2d), INTENT(in) :: domain !< The domain to which the grid data corresponds.
-    CLASS(*), INTENT(in), DIMENSION(:,:) :: glo_lat !< The latitude information for the grid tile.
-    CLASS(*), INTENT(in), DIMENSION(:,:) :: glo_lon !< The longitude information for the grid tile.
-    CLASS(*), INTENT(in), DIMENSION(:,:) :: aglo_lat !< The latitude information for the a-grid tile.
-    CLASS(*), INTENT(in), DIMENSION(:,:) :: aglo_lon !< The longitude information for the a-grid tile.
+    real, INTENT(in), DIMENSION(:,:) :: glo_lat !< The latitude information for the grid tile.
+    real, INTENT(in), DIMENSION(:,:) :: glo_lon !< The longitude information for the grid tile.
+    real, INTENT(in), DIMENSION(:,:) :: aglo_lat !< The latitude information for the a-grid tile.
+    real, INTENT(in), DIMENSION(:,:) :: aglo_lon !< The longitude information for the a-grid tile.
 end SUBROUTINE diag_grid_init
 
 SUBROUTINE diag_field_add_attribute_scalar_r(diag_field_id, att_name, att_value)
@@ -132,13 +162,14 @@ SUBROUTINE diag_field_add_attribute_scalar_r(diag_field_id, att_name, att_value)
   END SUBROUTINE diag_field_add_attribute_i1d
 
 INTEGER FUNCTION register_static_field(module_name, field_name, axes, long_name, units,&
-& missing_value, range, mask_variant, standard_name, DYNAMIC, do_not_log, interp_method,&
+& mask_variant, standard_name, DYNAMIC, do_not_log, interp_method,&
 & tile_count, area, volume, realm)
 CHARACTER(len=*), INTENT(in) :: module_name, field_name
 INTEGER, DIMENSION(:), INTENT(in) :: axes
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: long_name, units, standard_name
-CLASS(*), OPTIONAL, INTENT(in) :: missing_value
-CLASS(*), DIMENSION(:), OPTIONAL, INTENT(in) :: range
+! TODO: remove because it isn't used and it cause and error in Tapenade
+! CLASS(*), OPTIONAL, INTENT(in) :: missing_value
+! CLASS(*), DIMENSION(:), OPTIONAL, INTENT(in) :: range
 LOGICAL, OPTIONAL, INTENT(in) :: mask_variant
 LOGICAL, OPTIONAL, INTENT(in) :: DYNAMIC
 LOGICAL, OPTIONAL, INTENT(in) :: do_not_log !< if TRUE, field information is not logged
@@ -152,8 +183,9 @@ INTEGER,          OPTIONAL, INTENT(in) :: volume !< Field ID for the volume fiel
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: realm !< String to set as the value to the modeling_realm attribute
 end function register_static_field
 
+! TODO: remove because it isn't used and it cause and error in Tapenade
 INTEGER FUNCTION register_diag_field_scalar(module_name, field_name, init_time, &
-& long_name, units, missing_value, range, standard_name, do_not_log, err_msg,&
+& long_name, units, standard_name, missing_value, range, do_not_log, err_msg,&
 & area, volume, realm)
 CHARACTER(len=*),           INTENT(in) :: module_name   !< Module where the field comes from
 CHARACTER(len=*),           INTENT(in) :: field_name    !< Name of the field
@@ -161,8 +193,8 @@ TYPE(time_type),  OPTIONAL, INTENT(in) :: init_time     !< Time to start writing
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: long_name     !< Long_name to add as a variable attribute
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: units         !< Units to add as a variable_attribute
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: standard_name !< Standard_name to name the variable in the file
-CLASS(*),         OPTIONAL, INTENT(in) :: missing_value !< Missing value to add as a variable attribute
-CLASS(*),         OPTIONAL, INTENT(in) :: range(:)      !< Range to add a variable attribute
+REAL,         OPTIONAL, INTENT(in) :: missing_value !< Missing value to add as a variable attribute
+REAL,         OPTIONAL, INTENT(in) :: range(:)      !< Range to add a variable attribute
 LOGICAL,          OPTIONAL, INTENT(in) :: do_not_log    !< If TRUE, field information is not logged
 CHARACTER(len=*), OPTIONAL, INTENT(out):: err_msg       !< Error_msg from call
 INTEGER,          OPTIONAL, INTENT(in) :: area          !< Id of the area field
@@ -170,6 +202,7 @@ INTEGER,          OPTIONAL, INTENT(in) :: volume        !< Id of the volume fiel
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: realm         !< String to set as the modeling_realm attribute
 end function register_diag_field_scalar
 
+! TODO: remove because it isn't used and it cause and error in Tapenade
 INTEGER FUNCTION register_diag_field_array(module_name, field_name, axes, init_time, &
 & long_name, units, missing_value, range, mask_variant, standard_name, verbose,&
 & do_not_log, err_msg, interp_method, tile_count, area, volume, realm)
@@ -179,8 +212,8 @@ INTEGER,                    INTENT(in) :: axes(:)       !< Ids corresponding to 
 TYPE(time_type),  OPTIONAL, INTENT(in) :: init_time     !< Time to start writing data from
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: long_name     !< Long_name to add as a variable attribute
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: units         !< Units to add as a variable_attribute
-CLASS(*),         OPTIONAL, INTENT(in) :: missing_value !< Missing value to add as a variable attribute
-CLASS(*),         OPTIONAL, INTENT(in) :: range(:)      !< Range to add a variable attribute
+REAL,         OPTIONAL, INTENT(in) :: missing_value !< Missing value to add as a variable attribute
+REAL,         OPTIONAL, INTENT(in) :: range(:)      !< Range to add a variable attribute
 LOGICAL,          OPTIONAL, INTENT(in) :: mask_variant  !< Mask variant
 CHARACTER(len=*), OPTIONAL, INTENT(in) :: standard_name !< Standard_name to name the variable in the file
 LOGICAL,          OPTIONAL, INTENT(in) :: verbose       !< Print more information

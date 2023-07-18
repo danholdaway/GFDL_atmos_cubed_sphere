@@ -1,6 +1,6 @@
 module fms_io_mod
- use mpp_domains_mod
- use mpp_io_mod
+ use mpp_domains_mod, only: domain2d
+ use mpp_io_mod, only: fieldtype, axistype
 
 implicit none
 

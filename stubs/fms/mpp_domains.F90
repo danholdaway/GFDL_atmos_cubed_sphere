@@ -2,10 +2,9 @@ module mpp_domains_mod
 
   use platform_mod, only: i8_kind
 
-  use mpp_parameter_mod, only: GLOBAL_DATA_DOMAIN, BGRID_NE, FOLD_NORTH_EDGE, CGRID_NE, MPP_DOMAIN_TIME, &
-                               CYCLIC_GLOBAL_DOMAIN, NUPDATE, EUPDATE, XUPDATE, YUPDATE, SCALAR_PAIR, &
-                               NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST, AGRID, DGRID_NE, &
-                               BITWISE_EFP_SUM
+  use mpp_parameter_mod, only: GLOBAL, &
+                               WUPDATE, SUPDATE, SCALAR_BIT, &
+                               DGRID, BGRID, CGRID, CYCLIC
 implicit none
 private
 
@@ -35,7 +34,6 @@ public DGRID_NE, CGRID_NE, &
        mpp_get_compute_domains, mpp_get_domain_components, mpp_domains_set_stack_size, &
        mpp_define_nest_domains
 
-
   !!!!!!!!!FV_ARRAYS!!!!!!!!!!!!
   integer, parameter :: FVPRC = 8
   integer, parameter :: r_grid = 8
@@ -47,14 +45,31 @@ public DGRID_NE, CGRID_NE, &
   integer :: mpp_get_domain_shift ! dummy
   integer :: mpp_get_domain_components ! dummy
   integer :: mpp_domains_set_stack_size ! dummy
-  integer :: CENTER, CORNER, NORTH, EAST, SOUTH, WEST
+
+  integer, parameter :: CENTER=7, CORNER=8, NORTH=5, EAST=3, SOUTH=4, WEST=2
+  integer, parameter :: SOUTH_WEST=7, SOUTH_EAST=8, NORTH_WEST=9, NORTH_EAST=10
   integer, parameter :: BITWISE_EXACT_SUM = 1
+  integer, parameter :: BITWISE_EFP_SUM=2
 
   integer, parameter :: MAXOVERLAP = 100
   integer, parameter :: NAME_LENGTH = 64
   integer, parameter :: MAX_DOMAIN_FIELDS=100
   integer, parameter :: MAX_REQUEST = 100
   integer, parameter :: LONG_KIND = 4
+  integer, parameter :: GLOBAL_DATA_DOMAIN=2**GLOBAL, CYCLIC_GLOBAL_DOMAIN=2**CYCLIC
+  integer, parameter :: FOLD_NORTH_EDGE=2**NORTH
+  integer, parameter :: MPP_VERBOSE=1, MPP_DEBUG=2
+  integer, parameter :: MPP_DOMAIN_TIME=MPP_DEBUG+1
+
+  integer, parameter :: cgrid_ne=CGRID+2**NORTH+2**EAST
+  integer, parameter :: bgrid_ne=BGRID+2**NORTH+2**EAST
+  integer, parameter :: DGRID_NE=DGRID+2**NORTH+2**EAST
+  integer, parameter :: agrid=0
+  integer, parameter :: NUPDATE=2**NORTH
+  integer, parameter :: EUPDATE=2**EAST
+  integer, parameter :: XUPDATE=WUPDATE+EUPDATE
+  integer, parameter :: YUPDATE=SUPDATE+NUPDATE
+  integer, parameter :: SCALAR_PAIR=2**SCALAR_BIT
 
   type domain_axis_spec
    private

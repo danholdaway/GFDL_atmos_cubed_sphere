@@ -78,6 +78,7 @@ module mpp_parameter_mod
   integer, parameter :: SEND=1, RECV=2
   integer, parameter :: GLOBAL_DATA_DOMAIN=2**GLOBAL, CYCLIC_GLOBAL_DOMAIN=2**CYCLIC
   integer, parameter :: AGRID=0, BGRID=1, CGRID=2, DGRID=3
+  public :: BGRID, CGRID, DGRID
   integer, parameter :: BGRID_NE=BGRID+2**NORTH+2**EAST
   integer, parameter :: BGRID_SW=BGRID+2**SOUTH+2**WEST
   integer, parameter :: CGRID_NE=CGRID+2**NORTH+2**EAST

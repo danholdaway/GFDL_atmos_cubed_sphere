@@ -53,7 +53,5 @@ real(FVPRC), public, parameter :: RADIAN  = RAD_TO_DEG
 real(FVPRC), public, parameter :: C2DBARS = 1.e-4
 real(FVPRC), public, parameter :: KELVIN  = 273.15
 real(FVPRC), public, parameter :: EPSLN   = 1.0e-30
-
-contains
     
 end module constantsR4_mod

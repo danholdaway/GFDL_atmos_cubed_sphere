@@ -33,12 +33,13 @@ endtype bc_information
 !> @ingroup netcdf_io_mod
 type, private :: RestartVariable_t
   character(len=256) :: varname !< Variable name.
-  class(*), pointer :: data0d => null() !< Scalar data pointer.
-  class(*), dimension(:), pointer :: data1d => null() !< 1d data pointer.
-  class(*), dimension(:,:), pointer :: data2d => null() !< 2d data pointer.
-  class(*), dimension(:,:,:), pointer :: data3d => null() !< 3d data pointer.
-  class(*), dimension(:,:,:,:), pointer :: data4d => null() !< 4d data pointer.
-  class(*), dimension(:,:,:,:,:), pointer :: data5d => null() !< 5d data pointer.
+  ! Removed below comment dude to Tapenade "syntax error"
+  ! class(*), pointer :: data0d => null() !< Scalar data pointer.
+  ! class(*), dimension(:), pointer :: data1d => null() !< 1d data pointer.
+  ! class(*), dimension(:,:), pointer :: data2d => null() !< 2d data pointer.
+  ! class(*), dimension(:,:,:), pointer :: data3d => null() !< 3d data pointer.
+  ! class(*), dimension(:,:,:,:), pointer :: data4d => null() !< 4d data pointer.
+  ! class(*), dimension(:,:,:,:,:), pointer :: data5d => null() !< 5d data pointer.
   logical :: was_read !< Flag to support legacy "query_initialized" feature, which
                       !! keeps track if a file was read.
   logical :: is_bc_variable !< Flag indicating if variable is a bc_variable
@@ -97,7 +98,7 @@ type, private :: DomainDimension_t
   integer :: pos !< Domain position.
 endtype DomainDimension_t
 
-type, extends(FmsNetcdfFile_t), public :: FmsNetcdfDomainFile_t
+type, public :: FmsNetcdfDomainFile_t
   type(domain2d) :: domain !< Two-dimensional domain.
   type(DomainDimension_t), dimension(:), allocatable :: xdims !< Dimensions associated
                                                               !! with the "x" axis
@@ -110,6 +111,31 @@ type, extends(FmsNetcdfFile_t), public :: FmsNetcdfDomainFile_t
   character(len=256) :: non_mangled_path !< Non-domain-mangled file path.
   logical :: adjust_indices !< Flag telling if indices need to be adjusted
                             !! for domain-decomposed read.
+
+  ! TODO: manually extend FmsNetcdfDomainFile_t with FmsNetcdfFile_t to avoid Taepnade error due to `extends(FmsNetcdfFile_t)`
+  character(len=256) :: path !< File path.
+  logical :: is_readonly !< Flag telling if the file is readonly.
+  integer :: ncid !< Netcdf file id.
+  character(len=256) :: nc_format !< Netcdf file format.
+  logical :: is_netcdf4 !< Flag indicating if the netcdf file type is netcdf4
+  integer, dimension(:), allocatable :: pelist !< List of ranks who will
+                                               !! communicate.
+  integer :: io_root !< I/O root rank of the pelist.
+  logical :: is_root !< Flag telling if the current rank is the
+                     !! I/O root.
+  logical :: is_restart !< Flag telling if the this file is a restart
+                        !! file (that has internal pointers to data).
+  logical :: mode_is_append !! true if file is open in "append" mode
+  logical, allocatable :: is_open !< Allocated and set to true if opened.
+  type(RestartVariable_t), dimension(:), allocatable :: restart_vars !< Array of registered
+                                                                     !! restart variables.
+  integer :: num_restart_vars !< Number of registered restart variables.
+  type(CompressedDimension_t), dimension(:), allocatable :: compressed_dims !< "Compressed" dimension.
+  integer :: num_compressed_dims !< Number of compressed dimensions.
+  logical :: is_diskless !< Flag telling whether this is a diskless file.
+  character (len=20) :: time_name
+  type(dimension_information) :: bc_dimensions !<information about the current dimensions for regional
+                                               !! restart variables
 endtype FmsNetcdfDomainFile_t
 
 interface read_data
@@ -186,6 +212,11 @@ interface register_global_attribute
       module procedure register_global_attribute_str
       module procedure register_global_attribute_r
 end interface
+
+interface variable_exists
+      module procedure variable_exists_netcdfdomain
+      module procedure variable_exists_netcdf
+end interface 
     
 contains
 
@@ -521,11 +552,17 @@ subroutine read_data_netcdf_r_3d(src, string, dst, corner, edge_lengths)
   integer, optional, intent(in) :: corner(:), edge_lengths(:)
 end subroutine read_data_netcdf_r_3d
 
-logical function variable_exists(fileobj, variable_name, broadcast)
+logical function variable_exists_netcdfdomain(fileobj, variable_name, broadcast)
+  class(FmsNetcdfDomainFile_t), intent(in) :: fileobj !< File object.
+  character(len=*), intent(in) :: variable_name !< Variable name.
+  logical, intent(in), optional :: broadcast !< Flag controlling whether or
+end function variable_exists_netcdfdomain
+
+logical function variable_exists_netcdf(fileobj, variable_name, broadcast)
   class(FmsNetcdfFile_t), intent(in) :: fileobj !< File object.
   character(len=*), intent(in) :: variable_name !< Variable name.
   logical, intent(in), optional :: broadcast !< Flag controlling whether or
-end function variable_exists
+end function variable_exists_netcdf
 
 logical function file_exists(path) 
   character(len=*), intent(in) :: path

@@ -3,9 +3,7 @@ module mpp_mod
   ! MPP_DEBUG, NOTE, MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, WARNING
 
 use platform_mod, only: r8_kind, i8_kind
-use mpp_parameter_mod, only: MPP_DEBUG, NOTE, MPP_CLOCK_SYNC,MPP_CLOCK_DETAILED, FATAL, WARNING, &
-                             EVENT_RECV, CLOCK_ROUTINE, NULL_PE
-
+                             
 implicit none
 private
 
@@ -19,6 +17,12 @@ public mpp_error, FATAL, mpp_sum, mpp_sync, mpp_npes, mpp_broadcast, WARNING, mp
 
 integer, parameter :: NAME_LENGTH = 64
 integer, parameter, public :: CLOCK_SUBCOMPONENT=11
+integer, parameter :: NOTE=0, WARNING=1, FATAL=2
+integer, parameter :: NULL_PE=-3
+integer, parameter :: CLOCK_ROUTINE=41
+integer, parameter :: EVENT_RECV=3
+integer, parameter :: MPP_CLOCK_SYNC=1, MPP_CLOCK_DETAILED=2
+integer, parameter :: MPP_VERBOSE=1, MPP_DEBUG=2
 character(len=:), dimension(:), allocatable, target, public :: input_nml_file
 
 integer :: mpp_transmit ! dummy
