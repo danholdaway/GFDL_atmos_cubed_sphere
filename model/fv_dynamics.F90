@@ -302,12 +302,14 @@ contains
       integer :: ierr
       real :: time_total
       integer :: seconds, days
-
-      ccpp_associate: associate( cappa     => GFDL_interstitial%cappa,     &
-                                 dp1       => GFDL_interstitial%te0,       &
-                                 dtdt_m    => GFDL_interstitial%dtdt,      &
-                                 last_step => GFDL_interstitial%last_step, &
-                                 te_2d     => GFDL_interstitial%te0_2d     )
+      real, pointer :: cappa(:,:,:), dp1(:,:,:), dtdt_m(:,:,:), te_2d(:,:)
+      logical, pointer :: last_step
+      
+      cappa     => GFDL_interstitial%cappa   
+      dp1       => GFDL_interstitial%te0     
+      dtdt_m    => GFDL_interstitial%dtdt    
+      last_step => GFDL_interstitial%last_step
+      te_2d     => GFDL_interstitial%te0_2d  
 
       is  = bd%is
       ie  = bd%ie
@@ -1069,7 +1071,11 @@ contains
   ! Call CCPP timestep finalize
   call ccpp_physics_timestep_finalize(cdata, suite_name=trim(ccpp_suite), group_name="fast_physics", ierr=ierr)
 
-  end associate ccpp_associate
+  nullify(cappa)
+  nullify(dp1)
+  nullify(dtdt_m)
+  nullify(last_step)
+  nullify(te_2d)
 
   end subroutine fv_dynamics
 

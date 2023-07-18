@@ -226,11 +226,12 @@ contains
   real rcp, rg, rrg, bkh, dtmp, k1k
   integer:: i,j,k
   integer:: kdelz
-  integer:: nt, liq_wat, ice_wat, rainwat, snowwat, cld_amt, graupel, hailwat, ccn_cm3, iq, n, kmp, kp, k_next
+  integer:: nt, liq_wat, ice_wat, rainwat, snowwat, cld_amt, graupel, hailwat, ccn_cm3, iq, n, kp, k_next
   integer :: ierr
+  real, pointer :: fast_mp_consv, kmp
 
-      ccpp_associate: associate( fast_mp_consv => GFDL_interstitial%fast_mp_consv, &
-                                 kmp           => GFDL_interstitial%kmp            )
+       fast_mp_consv => GFDL_interstitial%fast_mp_consv
+       kmp           => GFDL_interstitial%kmp            
 
        k1k = rdgas/cv_air   ! akap / (1.-akap) = rg/Cv=0.4
         rg = rdgas
@@ -924,7 +925,8 @@ endif        ! end last_step check
   endif
 !$OMP end parallel
 
-  end associate ccpp_associate
+  nullify(fast_mp_consv)
+  nullify(kmp)
 
  end subroutine Lagrangian_to_Eulerian
 
