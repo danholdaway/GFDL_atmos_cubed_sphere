@@ -40,7 +40,7 @@
 !   <tr>
 !   <tr>
 !     <td>fv_mp_mod</td>
-!     <td>mp_reduce_max, ng, mp_gather, is_master, group_halo_update_type,
+!     <td>mp_reduce_max, is_master, group_halo_update_type,
 !         start_group_halo_update, complete_group_halo_update</td>
 !   </tr>
 !    <tr>
@@ -64,7 +64,7 @@
 module fv_tracer2d_mod
    use tp_core_mod,       only: fv_tp_2d, copy_corners
    use fv_mp_mod,         only: mp_reduce_max
-   use fv_mp_mod,         only: mp_gather, is_master
+   use fv_mp_mod,         only: is_master
    use fv_mp_mod,         only: group_halo_update_type
    use fv_mp_mod,         only: start_group_halo_update, complete_group_halo_update
    use mpp_domains_mod,   only: mpp_update_domains, CGRID_NE, domain2d

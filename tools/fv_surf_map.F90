@@ -45,7 +45,7 @@
 !   </tr>
 !   <tr>
 !     <td>fv_mp_mod</td>
-!     <td>ng,mp_stop, mp_reduce_min, mp_reduce_max, is_master</td>
+!     <td>is_master</td>
 !   </tr>
 !   <tr>
 !     <td>fv_timing_mod</td>
@@ -71,7 +71,7 @@
 
       use fv_grid_utils_mod, only: great_circle_dist, latlon2xyz, v_prod, normalize_vect
       use fv_grid_utils_mod, only: g_sum, global_mx, vect_cross
-      use fv_mp_mod,         only: mp_stop, mp_reduce_min, mp_reduce_max, is_master
+      use fv_mp_mod,         only: is_master
       use fv_timing_mod,     only: timing_on, timing_off
       use fv_arrays_mod,     only: fv_grid_bounds_type, R_GRID
 

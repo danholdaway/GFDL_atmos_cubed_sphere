@@ -84,7 +84,7 @@ module fv_treat_da_inc_mod
 !   </tr>
 !   <tr>
 !     <td>fv_mp_mod</td>
-!     <td>ng,is_master,fill_corners,YDir,mp_reduce_min, mp_reduce_max</td>
+!     <td>ng,is_master,fill_corners,YDir</td>
 !   </tr>
 !   <tr>
 !     <td>mpp_mod</td>
@@ -129,9 +129,7 @@ module fv_treat_da_inc_mod
                                cubed_to_latlon
   use fv_mp_mod,         only: is_master, &
                                fill_corners, &
-                               YDir, &
-                               mp_reduce_min, &
-                               mp_reduce_max
+                               YDir
   use sim_nc_mod,        only: open_ncfile, &
                                close_ncfile, &
                                get_ncdim1, &

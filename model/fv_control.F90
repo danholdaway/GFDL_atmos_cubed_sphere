@@ -70,7 +70,7 @@ module fv_control_mod
 !   <tr>
 !     <td>fv_mp_mod</td>
 !     <td>mp_start, mp_assign_gid, domain_decomp,ng, switch_current_Atm,
-!         broadcast_domains, mp_barrier, is_master, setup_master </td>
+!         broadcast_domains, is_master, setup_master </td>
 !   </tr>
 !   <tr>
 !     <td>fv_io_mod</td>
@@ -139,7 +139,7 @@ module fv_control_mod
    use fv_eta_mod,          only: set_eta
    use fv_grid_tools_mod,   only: init_grid
    use fv_mp_mod,           only: mp_start, domain_decomp, mp_assign_gid, global_nest_domain
-   use fv_mp_mod,           only: broadcast_domains, mp_barrier, is_master, setup_master, grids_master_procs, tile_fine
+   use fv_mp_mod,           only: broadcast_domains, is_master, setup_master, grids_master_procs, tile_fine
    use fv_mp_mod,           only: MAX_NNEST, MAX_NTILE
    use test_cases_mod,      only: read_namelist_test_case_nml
    use fv_timing_mod,       only: timing_on, timing_off, timing_init, timing_prt

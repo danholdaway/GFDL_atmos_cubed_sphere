@@ -60,7 +60,7 @@
 !     <td>fv_mp_mod</td>
 !     <td>ng, is_master,is,js,ie,je, isd,jsd,ied,jed,
 !         domain_decomp, fill_corners, XDir, YDir, mp_stop,
-!         mp_reduce_sum, mp_reduce_max, mp_gather, mp_bcst</td>
+!         mp_gather</td>
 !   </tr>
 !   <tr>
 !     <td>fv_sg_mod</td>
@@ -104,8 +104,7 @@
 #endif
       use init_hydro_mod,    only: p_var, hydro_eq
       use fv_mp_mod,         only: is_master,        &
-                                   domain_decomp, fill_corners, XDir, YDir, &
-                                   mp_stop, mp_reduce_sum, mp_reduce_max, mp_gather, mp_bcst
+                                   domain_decomp, fill_corners, XDir, YDir, mp_gather
       use fv_grid_utils_mod, only: cubed_to_latlon, great_circle_dist, mid_pt_sphere,    &
                                    ptop_min, inner_prod, get_latlon_vector, get_unit_vect2, &
                                    g_sum, latlon2xyz, cart_to_latlon, make_eta_level, f_p, project_sphere_v

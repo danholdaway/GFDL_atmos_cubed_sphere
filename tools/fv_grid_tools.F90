@@ -69,8 +69,7 @@ module fv_grid_tools_mod
 !   </tr>
 !   <tr>
 !     <td>fv_mp_mod</td>
-!     <td>ng, is_master, fill_corners, XDir, YDir,mp_gather,
-!         mp_bcst, mp_reduce_max, mp_stop </td>
+!     <td>ng, is_master, fill_corners, XDir, YDir</td>
 !   </tr>
 !   <tr>
 !     <td>fv_timing_mod</td>
@@ -125,7 +124,7 @@ module fv_grid_tools_mod
                                spherical_linear_interpolation, big_number
   use fv_timing_mod,     only: timing_on, timing_off
   use fv_mp_mod,         only: is_master, fill_corners, XDir, YDir
-  use fv_mp_mod,         only: mp_bcst, mp_reduce_max, mp_stop, grids_master_procs
+  use fv_mp_mod,         only: grids_master_procs
   use sorted_index_mod,  only: sorted_inta, sorted_intb
   use mpp_mod,           only: mpp_error, FATAL, get_unit, mpp_chksum, mpp_pe, stdout, &
                                mpp_send, mpp_recv, mpp_sync_self, EVENT_RECV, mpp_npes, &

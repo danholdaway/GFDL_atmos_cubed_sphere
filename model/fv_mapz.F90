@@ -94,7 +94,7 @@ module fv_mapz_mod
   use mpp_mod,           only: NOTE, FATAL, mpp_error, get_unit, mpp_root_pe, mpp_pe
   use fv_arrays_mod,     only: fv_grid_type, fv_grid_bounds_type, R_GRID, inline_mp_type
   use fv_timing_mod,     only: timing_on, timing_off
-  use fv_mp_mod,         only: is_master, mp_reduce_min, mp_reduce_max
+  use fv_mp_mod,         only: is_master
   ! CCPP fast physics
   use ccpp_static_api,   only: ccpp_physics_run
   use CCPP_data,         only: ccpp_suite
