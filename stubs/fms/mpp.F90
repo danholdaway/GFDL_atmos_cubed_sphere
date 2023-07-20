@@ -71,10 +71,14 @@ interface mpp_min
 end interface
 
 interface mpp_max
+    module procedure mpp_max_i4_0d
+    module procedure mpp_max_i8_0d
     module procedure mpp_max_i4_1d
     module procedure mpp_max_i8_1d
-    module procedure mpp_max_r4
-    module procedure mpp_max_r8
+    module procedure mpp_max_r4_0d
+    module procedure mpp_max_r8_0d
+    module procedure mpp_max_r4_1d
+    module procedure mpp_max_r8_1d
 end interface
 
 interface mpp_recv
@@ -112,25 +116,43 @@ subroutine mpp_sync_self(check)
   integer, optional, intent(in) :: check
 end subroutine
 
+subroutine mpp_max_i4_0d(arg)
+  integer(kind=4), intent(inout) :: arg
+end subroutine mpp_max_i4_0d
+
+subroutine mpp_max_i8_0d(arg)
+  integer(kind=8), intent(inout) :: arg
+end subroutine mpp_max_i8_0d
+
 subroutine mpp_max_i4_1d(arg, len, pelist)
-  integer(kind=4), intent(inout) :: arg(:)
   integer, intent(in) :: len
+  integer(kind=4), intent(inout) :: arg(len)
   integer, optional, intent(in) :: pelist(:)
 end subroutine mpp_max_i4_1d
 
 subroutine mpp_max_i8_1d(arg, len, pelist)
-  integer(kind=8), intent(inout) :: arg(:)
   integer, intent(in) :: len
+  integer(kind=8), intent(inout) :: arg(len)
   integer, optional, intent(in) :: pelist(:)
 end subroutine mpp_max_i8_1d
 
-subroutine mpp_max_r4(arg)
+subroutine mpp_max_r4_0d(arg)
   real(kind=4), intent(inout) :: arg
-end subroutine mpp_max_r4
+end subroutine mpp_max_r4_0d
 
-subroutine mpp_max_r8(arg)
+subroutine mpp_max_r8_0d(arg)
   real(kind=8), intent(inout) :: arg
-end subroutine mpp_max_r8
+end subroutine mpp_max_r8_0d
+
+subroutine mpp_max_r4_1d(arg, len)
+  integer, intent(in) :: len
+  real(kind=4), intent(inout) :: arg(len)
+end subroutine mpp_max_r4_1d
+
+subroutine mpp_max_r8_1d(arg, len)
+  integer, intent(in) :: len
+  real(kind=8), intent(inout) :: arg(len)
+end subroutine mpp_max_r8_1d
 
 subroutine mpp_min_r4(arg)
   real(kind=4), intent(inout) :: arg
