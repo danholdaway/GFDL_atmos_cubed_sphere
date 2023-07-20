@@ -143,7 +143,7 @@ module dyn_core_mod
 #ifdef MULTI_GASES
     use multi_gases_mod,  only:  virqd, vicpqd, vicvqd, virq, vicvq
 #endif
-  use fv_regional_mod,     only: dump_field, exch_uv, H_STAGGER, U_STAGGER, V_STAGGER
+  use fv_regional_mod,     only: dump_field, H_STAGGER, U_STAGGER, V_STAGGER
   use fv_regional_mod,     only: a_step, p_step, k_step, n_step
 
 implicit none
