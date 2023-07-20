@@ -151,7 +151,7 @@ module fv_grid_tools_mod
 
   implicit none
   private
-#include <netcdf.inc>
+! #include <netcdf.inc>
 
   real(kind=R_GRID), parameter:: radius = cnst_radius
 

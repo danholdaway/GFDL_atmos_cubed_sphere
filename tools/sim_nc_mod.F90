@@ -37,11 +37,13 @@ module sim_nc_mod
 #error Compile time options -DOLD_PT_TO_T and -DOLD_COS_SG are no longer supported. Please remove them from your XML.
 #error
 #endif
-
+ use netcdf,      only: nf_open, nf_close, NF_NOWRITE, NF_NOERR, nf_inq_dimid, &
+                        nf_inq_dimlen, nf_inq_varid, nf_get_vara_real, nf_get_vara_double, nf_strerror, &
+                        nf_get_var_real, nf_get_var_double, nf_get_att, nf_get_att_text
  use mpp_mod,     only: mpp_error, FATAL
 
  implicit none
-#include <netcdf.inc>
+! #include <netcdf.inc>
 
  private
  public  open_ncfile, close_ncfile, get_ncdim1, get_var1_double, get_var2_double,   &

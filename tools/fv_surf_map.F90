@@ -61,7 +61,8 @@
 !     <td>mpp_update_domains, domain2d</td>
 !   </tr>
 ! </table>
-
+      use netcdf,            only: nf_open, nf_close, NF_NOWRITE, NF_NOERR, nf_inq_dimid, &
+                                   nf_inq_dimlen, nf_inq_varid, nf_get_vara_real, nf_strerror
       use fms_mod,           only: check_nml_error, stdlog, &
                                    mpp_pe, mpp_root_pe, FATAL, error_mesg
       use fms2_io_mod,       only: file_exists
@@ -132,7 +133,7 @@
                          stretch_fac, nested, bounded_domain, npx_global, domain,grid_number, bd)
 
       implicit         none
-#include <netcdf.inc>
+! #include <netcdf.inc>
       integer, intent(in):: npx, npy
 
     ! INPUT arrays
@@ -219,7 +220,7 @@
 !
       if ( file_exists(surf_file) ) then
          if (surf_format == "netcdf") then
-
+            
           status = nf_open (surf_file, NF_NOWRITE, ncid)
           if (status .ne. NF_NOERR) call handle_err(status)
 
@@ -325,7 +326,7 @@
 
          if (is_master()) write(*,*) 'Terrain dataset =', nlon, 'jt=', jt
          if (is_master()) write(*,*) 'igh (terrain ghosting)=', igh
-
+         
          status = nf_inq_varid (ncid, 'ftopo', ftopoid)
          if (status .ne. NF_NOERR) call handle_err(status)
          nread = 1;   start = 1
@@ -344,7 +345,7 @@
                ft(i,j) = ft(i-nlon,j)
             enddo
          enddo
-
+         
          status = nf_inq_varid (ncid, 'htopo', htopoid)
          if (status .ne. NF_NOERR) call handle_err(status)
          allocate ( zs(-igh:nlon+igh,jt) )
@@ -1531,9 +1532,9 @@
 !>@brief The subroutine 'handle_err' returns an error when
 !! it cannot find or correctly read in an external file.
  subroutine handle_err(status)
-#include <netcdf.inc>
+! #include <netcdf.inc>
       integer          status
-
+      
       if (status .ne. nf_noerr) then
         print *, nf_strerror(status)
         stop 'Stopped'

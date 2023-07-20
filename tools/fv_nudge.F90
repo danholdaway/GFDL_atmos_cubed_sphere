@@ -1555,6 +1555,7 @@ module fv_nwp_nudge_mod
 
 
  subroutine get_ncep_analysis ( ps, u, v, t, q, zvir, ts, nfile, fname, bd )
+  use netcdf
   real,     intent(in):: zvir
   character(len=128), intent(in):: fname
   integer,  intent(inout):: nfile
@@ -1572,7 +1573,7 @@ module fv_nwp_nudge_mod
   logical:: land_ts = .false.
 
   integer:: status, var3id    ! h1g, 2016-08-10
-#include <netcdf.inc>
+! #include <netcdf.inc>
 
 
   if( .not. file_exists(fname) ) then
