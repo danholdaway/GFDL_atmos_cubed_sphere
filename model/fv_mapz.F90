@@ -228,10 +228,6 @@ contains
   integer:: kdelz
   integer:: nt, liq_wat, ice_wat, rainwat, snowwat, cld_amt, graupel, hailwat, ccn_cm3, iq, n, kp, k_next
   integer :: ierr
-  real, pointer :: fast_mp_consv, kmp
-
-       fast_mp_consv => GFDL_interstitial%fast_mp_consv
-       kmp           => GFDL_interstitial%kmp            
 
        k1k = rdgas/cv_air   ! akap / (1.-akap) = rg/Cv=0.4
         rg = rdgas
@@ -248,7 +244,7 @@ contains
        ccn_cm3 = get_tracer_index (MODEL_ATMOS, 'ccn_cm3')
 
        if ( do_adiabatic_init .or. do_sat_adj ) then
-            fast_mp_consv = (.not.do_adiabatic_init) .and. consv>consv_min
+            GFDL_interstitial%fast_mp_consv = (.not.do_adiabatic_init) .and. consv>consv_min
        endif
 
 !$OMP parallel do default(none) shared(is,ie,js,je,km,pe,ptop,kord_tm,hydrostatic, &
@@ -924,9 +920,6 @@ endif        ! end last_step check
     endif
   endif
 !$OMP end parallel
-
-  nullify(fast_mp_consv)
-  nullify(kmp)
 
  end subroutine Lagrangian_to_Eulerian
 
