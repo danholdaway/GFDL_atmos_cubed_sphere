@@ -20,6 +20,10 @@ modes = tap_options['modes']
 # Build list of files to process
 file_list = glob.glob(os.path.join(base_path, 'pert', 'model_nlm', '*0'))
 file_list += glob.glob(os.path.join(base_path, 'pert', 'tools_nlm', '*0'))
+file_list += glob.glob(os.path.join(base_path, 'stubs', '*0'))
+file_list += glob.glob(os.path.join(base_path, 'stubs/fms', '*0'))
+file_list += glob.glob(os.path.join(base_path, 'stubs/netcdf', '*0'))
+file_list += glob.glob(os.path.join(base_path, 'stubs/mpi', '*0'))
 
 # Move element containing 'fv_dynamics_nlm.F90' to the front of the list
 file_list.insert(0, file_list.pop(file_list.index(os.path.join(base_path, 'pert', 'model_nlm',
