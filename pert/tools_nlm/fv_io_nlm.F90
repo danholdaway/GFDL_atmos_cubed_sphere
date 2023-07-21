@@ -67,7 +67,7 @@ module fv_io_nlm_mod
 !   </tr>
 !   <tr>
 !     <td>fv_mp_nlm_mod</td>
-!     <td>ng, mp_gather, is_master</td>
+!     <td>is_master</td>
 !   </tr>
 !   <tr>
 !     <td>mpp_mod</td>
@@ -110,7 +110,7 @@ module fv_io_nlm_mod
   use fv_arrays_nlm_mod,           only: fv_atmos_type, fv_nest_BC_type_3D
   use fv_eta_nlm_mod,              only: set_external_eta
 
-  use fv_mp_nlm_mod,               only: mp_gather, is_master
+  use fv_mp_nlm_mod,               only: is_master
   use fv_treat_da_inc_nlm_mod,     only: read_da_inc
 
   implicit none

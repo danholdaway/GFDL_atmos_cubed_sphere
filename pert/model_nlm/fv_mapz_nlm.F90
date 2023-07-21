@@ -96,7 +96,7 @@ module fv_mapz_nlm_mod
   use mpp_mod,           only: NOTE, FATAL, mpp_error, get_unit, mpp_root_pe, mpp_pe
   use fv_arrays_nlm_mod,     only: fv_grid_type, fv_grid_bounds_type, R_GRID, inline_mp_type
   use fv_timing_nlm_mod,     only: timing_on, timing_off
-  use fv_mp_nlm_mod,         only: is_master, mp_reduce_min, mp_reduce_max
+  use fv_mp_nlm_mod,         only: is_master
   ! CCPP fast physics
   use ccpp_static_api,   only: ccpp_physics_run
   use CCPP_data,         only: ccpp_suite
@@ -228,11 +228,8 @@ contains
   real rcp, rg, rrg, bkh, dtmp, k1k
   integer:: i,j,k
   integer:: kdelz
-  integer:: nt, liq_wat, ice_wat, rainwat, snowwat, cld_amt, graupel, hailwat, ccn_cm3, iq, n, kmp, kp, k_next
+  integer:: nt, liq_wat, ice_wat, rainwat, snowwat, cld_amt, graupel, hailwat, ccn_cm3, iq, n, kp, k_next
   integer :: ierr
-
-      ccpp_associate: associate( fast_mp_consv => GFDL_interstitial%fast_mp_consv, &
-                                 kmp           => GFDL_interstitial%kmp            )
 
        k1k = rdgas/cv_air   ! akap / (1.-akap) = rg/Cv=0.4
         rg = rdgas
@@ -249,7 +246,7 @@ contains
        ccn_cm3 = get_tracer_index (MODEL_ATMOS, 'ccn_cm3')
 
        if ( do_adiabatic_init .or. do_sat_adj ) then
-            fast_mp_consv = (.not.do_adiabatic_init) .and. consv>consv_min
+            GFDL_interstitial%fast_mp_consv = (.not.do_adiabatic_init) .and. consv>consv_min
        endif
 
 !$OMP parallel do default(none) shared(is,ie,js,je,km,pe,ptop,kord_tm,hydrostatic, &
@@ -809,8 +806,6 @@ endif        ! end last_step check
     endif
   endif
 !$OMP end parallel
-
-  end associate ccpp_associate
 
  end subroutine Lagrangian_to_Eulerian
 

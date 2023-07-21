@@ -72,7 +72,7 @@ module fv_treat_da_inc_nlm_mod
 !          R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_control_nlm_mod</td>
+!     <td>fv_control_mod</td>
 !     <td>fv_init, fv_end, ngrids</td>
 !   </tr>
 !   <tr>
@@ -86,7 +86,7 @@ module fv_treat_da_inc_nlm_mod
 !   </tr>
 !   <tr>
 !     <td>fv_mp_nlm_mod</td>
-!     <td>ng,is_master,fill_corners,YDir,mp_reduce_min, mp_reduce_max</td>
+!     <td>ng,is_master,fill_corners,YDir</td>
 !   </tr>
 !   <tr>
 !     <td>mpp_mod</td>
@@ -131,9 +131,7 @@ module fv_treat_da_inc_nlm_mod
                                cubed_to_latlon
   use fv_mp_nlm_mod,         only: is_master, &
                                fill_corners, &
-                               YDir, &
-                               mp_reduce_min, &
-                               mp_reduce_max
+                               YDir
   use sim_nc_nlm_mod,        only: open_ncfile, &
                                close_ncfile, &
                                get_ncdim1, &

@@ -41,7 +41,7 @@ module boundary_nlm_mod
 !   </tr>
 !   <tr>
 !     <td>fv_mp_nlm_mod</td>
-!     <td>ng, isc,jsc,iec,jec, isd,jsd,ied,jed, is,js,ie,je, is_master, mp_bcst</td>
+!     <td>is_master</td>
 !   </tr>
 !   <tr>
 !     <td>fv_timing_nlm_mod</td>
@@ -70,7 +70,6 @@ module boundary_nlm_mod
   use mpp_domains_mod,    only: AGRID, BGRID_NE, CGRID_NE, DGRID_NE
   use mpp_mod,            only: mpp_error, FATAL, mpp_sum, mpp_sync, mpp_npes, mpp_broadcast, WARNING, mpp_pe
 
-  use fv_mp_nlm_mod,          only: mp_bcst
   use fv_arrays_nlm_mod,      only: fv_atmos_type, fv_nest_BC_type_3D, fv_grid_bounds_type
   use mpp_mod,            only: mpp_send, mpp_recv
   use fv_timing_nlm_mod,      only: timing_on, timing_off
@@ -2268,13 +2267,6 @@ contains
 
    real :: var_nest_3d(is_n:ie_n+istag,js_n:je_n+jstag,1)
    real :: var_coarse_3d(isd_p:ied_p+istag,jsd_p:jed_p+jstag,1)
-   integer( KIND = 8) :: ptr_nest=0
-   integer( KIND = 8) :: ptr_coarse=0
-   pointer(ptr_nest, var_nest_3d)
-   pointer(ptr_coarse, var_coarse_3d)
-
-   if (child_proc .and. size(var_nest) > 1) ptr_nest = LOC(var_nest)
-   if (parent_proc .and. size(var_coarse) > 1) ptr_coarse = LOC(var_coarse)
 
    call update_coarse_grid_mpp(var_coarse_3d, var_nest_3d, &
         nest_domain, dx, dy, area, &

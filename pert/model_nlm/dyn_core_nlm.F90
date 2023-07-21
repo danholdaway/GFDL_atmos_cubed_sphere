@@ -145,7 +145,7 @@ module dyn_core_nlm_mod
 
 
 
-  use fv_regional_nlm_mod,     only: dump_field, exch_uv, H_STAGGER, U_STAGGER, V_STAGGER
+  use fv_regional_nlm_mod,     only: dump_field, H_STAGGER, U_STAGGER, V_STAGGER
   use fv_regional_nlm_mod,     only: a_step, p_step, k_step, n_step
 
 implicit none

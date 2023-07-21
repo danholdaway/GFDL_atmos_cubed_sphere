@@ -57,7 +57,7 @@ module fv_restart_nlm_mod
 !     <td>fv_atmos_type, fv_nest_type, fv_grid_bounds_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_control_nlm_mod</td>
+!     <td>fv_control_mod</td>
 !     <td>fv_init, fv_end, ngrids</td>
 !   </tr>
 !   <tr>

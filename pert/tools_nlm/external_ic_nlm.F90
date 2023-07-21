@@ -66,7 +66,7 @@ module external_ic_nlm_mod
 !     <td>fv_atmos_type, fv_grid_type, fv_grid_bounds_type, R_GRID</td>
 !   </tr>
 !   <tr>
-!     <td>fv_control_nlm_mod</td>
+!     <td>fv_control_mod</td>
 !     <td>fv_init, fv_end, ngrids</td>
 !   </tr>
 !   <tr>
@@ -145,7 +145,6 @@ module external_ic_nlm_mod
 !   </tr>
 ! </table>
 
-   use netcdf
    use external_sst_nlm_mod,   only: i_sst, j_sst, sst_ncep
    use fms_mod,            only: write_version_number, check_nml_error
    use fms2_io_mod,        only: file_exists, open_file, close_file, read_data, variable_exists, &

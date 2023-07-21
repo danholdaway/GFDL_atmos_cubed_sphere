@@ -47,7 +47,7 @@ module fv_regional_nlm_mod
    use tracer_manager_mod,only: get_tracer_index,get_tracer_names
    use field_manager_mod, only: MODEL_ATMOS
    use time_manager_mod,  only: get_time                                &
-                               ,operator(-),operator(/)                 &
+                               ,time_minus,time_divide                 &
                                ,time_type,time_type_to_real
    use constants_mod,     only: cp_air, cp_vapor, grav, kappa           &
                                ,pi=>pi_8,rdgas, rvgas
@@ -77,7 +77,7 @@ module fv_regional_nlm_mod
             ,bc_hour                                                    &
             ,bc_time_interval                                           &
             ,BC_t0,BC_t1                                                &
-            ,begin_regional_restart,exch_uv                             &
+            ,begin_regional_restart                                     &
             ,ntimesteps_per_bc_update                                   &
             ,read_new_bc_data                                           &
             ,regional_bc_data                                           &
@@ -1547,8 +1547,8 @@ contains
 !***********************************************************************
 !-----------------------------------------------------------------------
 !
-      atmos_time = Time - Atm%Time_init
-      atmos_time_step = atmos_time / Time_step_atmos
+      atmos_time = time_minus(Time, Atm%Time_init)
+      atmos_time_step = time_divide(atmos_time, Time_step_atmos)
       current_time_in_seconds = time_type_to_real( atmos_time )
       if (mpp_pe() == 0 .and. Atm%flagstruct%fv_debug) write(*,"('current_time_seconds = ',f9.1)")current_time_in_seconds
 !
@@ -6511,207 +6511,6 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
 !---------------------------------------------------------------------
 !
       end subroutine apply_delz_boundary
-!
-!---------------------------------------------------------------------
-!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-!---------------------------------------------------------------------
-
-  subroutine exch_uv(domain, bd, npz, u, v)
-    use mpi
-
-    implicit none
-
-    type(domain2d), intent(inout) :: domain
-    type(fv_grid_bounds_type), intent(in) :: bd
-    integer, intent(in) :: npz
-    real, intent(inout) :: u   (bd%isd:bd%ied  ,bd%jsd:bd%jed+1,1:npz)
-    real, intent(inout) :: v   (bd%isd:bd%ied+1,bd%jsd:bd%jed  ,1:npz)
-
-    real, dimension(:), allocatable :: buf1,buf2,buf3,buf4
-    integer :: ihandle1,ihandle2,ihandle3,ihandle4
-    integer,dimension(MPI_STATUS_SIZE) :: istat
-    integer :: ic, i, j, k, is, ie, js, je
-    integer :: irecv, isend, ierr
-
-    integer :: mype
-    integer :: north_pe, south_pe, east_pe, west_pe
-
-    mype = mpp_pe()
-    call mpp_get_neighbor_pe( domain, NORTH, north_pe)
-    call mpp_get_neighbor_pe( domain, SOUTH, south_pe)
-    call mpp_get_neighbor_pe( domain, WEST,  west_pe)
-    call mpp_get_neighbor_pe( domain, EAST,  east_pe)
-
-    ! write(0,*) ' north_pe = ', north_pe
-    ! write(0,*) ' south_pe = ', south_pe
-    ! write(0,*) ' west_pe  = ', west_pe
-    ! write(0,*) ' east_pe  = ', east_pe
-
-    is=bd%is
-    ie=bd%ie
-    js=bd%js
-    je=bd%je
-
-    ! The size of these buffers must match the number of indices
-    ! required below to send/receive the data. In particular,
-    ! buf1 and buf4 must be of the same size (sim. for buf2 and buf3).
-    ! Changes to the code below should be tested with debug flags
-    ! enabled (out-of-bounds reads/writes).
-    allocate(buf1(1:24*npz)) ; buf1=real_snan
-    allocate(buf2(1:36*npz)) ; buf2=real_snan
-    allocate(buf3(1:36*npz)) ; buf3=real_snan
-    allocate(buf4(1:24*npz)) ; buf4=real_snan
-
-! FIXME: MPI_COMM_WORLD
-
-
-! Receive from north
-    if( north_pe /= NULL_PE )then
-       call MPI_Irecv(buf1,size(buf1),MPI_DOUBLE_PRECISION,north_pe,north_pe &
-                     ,MPI_COMM_WORLD,ihandle1,irecv)
-    endif
-
-! Receive from south
-    if( south_pe /= NULL_PE )then
-       call MPI_Irecv(buf2,size(buf2),MPI_DOUBLE_PRECISION,south_pe,south_pe &
-                     ,MPI_COMM_WORLD,ihandle2,irecv)
-    endif
-
-! Send to north
-    if( north_pe /= NULL_PE )then
-       ic=0
-       do k=1,npz
-
-         do j=je-3+1,je-1+1
-         do i=is-3,is-1
-           ic=ic+1
-           buf3(ic)=u(i,j,k)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           buf3(ic)=u(i,j,k)
-         enddo
-         enddo
-
-         do j=je-2,je
-         do i=is-3,is-1
-           ic=ic+1
-           buf3(ic)=v(i,j,k)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           buf3(ic)=v(i,j,k)
-         enddo
-         enddo
-       enddo
-       if (ic/=size(buf2).or.ic/=size(buf3)) &
-         call mpp_error(FATAL,'Buffer sizes buf2 and buf3 in routine exch_uv do not match actual message size')
-       call MPI_Issend(buf3,size(buf3),MPI_DOUBLE_PRECISION,north_pe,mype &
-                      ,MPI_COMM_WORLD,ihandle3,isend)
-    endif
-
-! Send to south
-    if( south_pe /= NULL_PE )then
-       ic=0
-       do k=1,npz
-
-         do j=js+2,js+3
-         do i=is-3,is-1
-           ic=ic+1
-           buf4(ic)=u(i,j,k)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           buf4(ic)=u(i,j,k)
-         enddo
-         enddo
-
-         do j=js+1,js+2
-         do i=is-3,is-1
-           ic=ic+1
-           buf4(ic)=v(i,j,k)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           buf4(ic)=v(i,j,k)
-         enddo
-         enddo
-
-       enddo
-       if (ic/=size(buf1).or.ic/=size(buf4)) &
-         call mpp_error(FATAL,'Buffer sizes buf1 and buf4 in routine exch_uv do not match actual message size')
-       call MPI_Issend(buf4,size(buf4),MPI_DOUBLE_PRECISION,south_pe,mype &
-                      ,MPI_COMM_WORLD,ihandle4,isend)
-    endif
-
-! Store from south
-    if( south_pe /= NULL_PE )then
-       ic=0
-       call MPI_Wait(ihandle2,istat,ierr)
-       do k=1,npz
-
-         do j=js-3,js-1
-         do i=is-3,is-1
-           ic=ic+1
-           u(i,j,k)=buf2(ic)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           u(i,j,k)=buf2(ic)
-         enddo
-         enddo
-
-         do j=js-3,js-1
-         do i=is-3,is-1
-           ic=ic+1
-           v(i,j,k)=buf2(ic)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           v(i,j,k)=buf2(ic)
-         enddo
-         enddo
-
-       enddo
-    endif
-
-! Store from north
-    if( north_pe /= NULL_PE )then
-       ic=0
-       call MPI_Wait(ihandle1,istat,ierr)
-       do k=1,npz
-
-         do j=je+2+1,je+3+1
-         do i=is-3,is-1
-           ic=ic+1
-           u(i,j,k)=buf1(ic)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           u(i,j,k)=buf1(ic)
-         enddo
-         enddo
-
-         do j=je+2,je+3
-         do i=is-3,is-1
-           ic=ic+1
-           v(i,j,k)=buf1(ic)
-         enddo
-         do i=ie+1,ie+3
-           ic=ic+1
-           v(i,j,k)=buf1(ic)
-         enddo
-         enddo
-
-       enddo
-    endif
-
-    deallocate(buf1)
-    deallocate(buf2)
-    deallocate(buf3)
-    deallocate(buf4)
-
-  end subroutine exch_uv
 
 !---------------------------------------------------------------------
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -6748,9 +6547,9 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
        if (mpp_pe() == 0) write(0,*) 'INPUT source not found ',lstatus,' set source=No Source Attribute'
        source='No Source Attribute'
        call mpp_error(FATAL,'fv_regional_bc::get_data_source - input source not &  
-            found in file gfs_data.nc. The accepted & 
-            FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", &
-            "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')                       
+           & found in file gfs_data.nc. The accepted & 
+           & FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", &
+           & "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')                       
       endif
       call mpp_error(NOTE, 'INPUT gfs_data source string: '//trim(source))
 
@@ -6800,10 +6599,10 @@ subroutine remap_scalar_nggps_regional_bc(Atm                         &
        if (mpp_pe() == 0) write(0,*) 'INPUT source not found ',lstatus,' set source=No Source Attribute' 
        source='No Source Attribute'
        call mpp_error(FATAL,'fv_regional_bc::get_lbc_source - input source not &   
-            found in file &
-            gfs_bndy.tile7.000.nc. The accepted & 
-            FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", &
-            "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')          
+           & found in file &
+           & gfs_bndy.tile7.000.nc. The accepted & 
+           & FV3 sources are "FV3GFS GAUSSIAN NEMSIO FILE", &
+           & "FV3GFS GAUSSIAN NETCDF FILE" or "FV3GFS GRIB2 FILE".')          
       endif
       call mpp_error(NOTE, 'INPUT gfs_bndy source string: '//trim(source))
 
