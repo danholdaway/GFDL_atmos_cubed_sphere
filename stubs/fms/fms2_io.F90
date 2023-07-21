@@ -187,9 +187,8 @@ interface write_restart
 end interface
 
 interface register_field
-    module procedure register_field_netcdf
+    module procedure register_field_netcdf_1d
     module procedure register_field_netcdfdomain_1d
-    module procedure register_field_netcdfdomain_3d
 end interface
 
 interface write_data
@@ -326,23 +325,17 @@ subroutine write_data_netcdfdomain_r_3d(file, name, buffer)
   real, intent(in) :: buffer(:,:,:)
 end subroutine write_data_netcdfdomain_r_3d
 
-subroutine register_field_netcdf(file, name, field_type, dim_names)
+subroutine register_field_netcdf_1d(file, name, field_type, dim_names)
   type(FmsNetcdfFile_t), intent(in) :: file
   character(len=*), intent(in) :: name, field_type
   character(len=*), intent(in)  :: dim_names(:)
-end subroutine register_field_netcdf
+end subroutine register_field_netcdf_1d
 
 subroutine register_field_netcdfdomain_1d(file, name, field_type, dim_names)
   type(FmsNetcdfDomainFile_t), intent(in) :: file
   character(len=*), intent(in) :: name, field_type
   character(len=*), intent(in)  :: dim_names(:)
 end subroutine register_field_netcdfdomain_1d
-
-subroutine register_field_netcdfdomain_3d(file, name, field_type, dim_names)
-  type(FmsNetcdfDomainFile_t), intent(in) :: file
-  character(len=*), intent(in) :: name, field_type
-  character(len=*), intent(in)  :: dim_names(:,:,:)
-end subroutine register_field_netcdfdomain_3d
 
 subroutine write_restart_bc(file)
   type(FmsNetcdfFile_t), intent(inout) :: file
