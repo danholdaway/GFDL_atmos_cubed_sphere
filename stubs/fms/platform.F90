@@ -36,7 +36,8 @@ module platform_mod
 
 
     integer, public, parameter :: r8_kind = 8
-    integer, public, parameter :: r4_kind = 4
+    integer, public, parameter :: r4_kind = 8
     integer, public, parameter :: i8_kind = 8
+    integer, public, parameter :: i4_kind = 4
     
 end module platform_mod
