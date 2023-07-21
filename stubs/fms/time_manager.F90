@@ -5,8 +5,9 @@ implicit none
 private
 
 public time_type, get_time, month_name, get_date, time_type_to_real
+public time_minus, time_divide
 
-public operator(+), operator(-), operator(/), assignment(=)
+! public operator(+), operator(-), operator(/), assignment(=)
 
 type time_type
    private
@@ -16,10 +17,10 @@ type time_type
    integer:: dummy ! added as a workaround bug on IRIX64 (AP)
 end type time_type
 
-interface operator (+);   module procedure time_plus;        end interface
-interface operator (-);   module procedure time_minus;       end interface
-interface operator (/);   module procedure time_divide;      end interface
-interface assignment (=);   module procedure time_assignment;      end interface
+! interface operator (+);   module procedure time_plus;        end interface
+! interface operator (-);   module procedure time_minus;       end interface
+! interface operator (/);   module procedure time_divide;      end interface
+! interface assignment (=);   module procedure time_assignment;      end interface
 
 contains
 

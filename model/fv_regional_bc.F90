@@ -45,7 +45,7 @@ module fv_regional_mod
    use tracer_manager_mod,only: get_tracer_index,get_tracer_names
    use field_manager_mod, only: MODEL_ATMOS
    use time_manager_mod,  only: get_time                                &
-                               ,operator(-),operator(/)                 &
+                               ,time_minus,time_divide                 &
                                ,time_type,time_type_to_real
    use constants_mod,     only: cp_air, cp_vapor, grav, kappa           &
                                ,pi=>pi_8,rdgas, rvgas
@@ -1556,8 +1556,8 @@ contains
 !***********************************************************************
 !-----------------------------------------------------------------------
 !
-      atmos_time = Time - Atm%Time_init
-      atmos_time_step = atmos_time / Time_step_atmos
+      atmos_time = time_minus(Time, Atm%Time_init)
+      atmos_time_step = time_divide(atmos_time, Time_step_atmos)
       current_time_in_seconds = time_type_to_real( atmos_time )
       if (mpp_pe() == 0 .and. Atm%flagstruct%fv_debug) write(*,"('current_time_seconds = ',f9.1)")current_time_in_seconds
 !
