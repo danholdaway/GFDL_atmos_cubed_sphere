@@ -1555,7 +1555,7 @@ module fv_nwp_nudge_mod
 
 
  subroutine get_ncep_analysis ( ps, u, v, t, q, zvir, ts, nfile, fname, bd )
-  use netcdf
+  use netcdf, only: nf_inq_varid, nf_noerr
   real,     intent(in):: zvir
   character(len=128), intent(in):: fname
   integer,  intent(inout):: nfile
