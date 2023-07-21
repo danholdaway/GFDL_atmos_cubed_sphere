@@ -143,7 +143,6 @@ module external_ic_mod
 !   </tr>
 ! </table>
 
-   use netcdf
    use external_sst_mod,   only: i_sst, j_sst, sst_ncep
    use fms_mod,            only: write_version_number, check_nml_error
    use fms2_io_mod,        only: file_exists, open_file, close_file, read_data, variable_exists, &
